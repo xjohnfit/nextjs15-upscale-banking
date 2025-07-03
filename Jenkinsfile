@@ -26,11 +26,9 @@ pipeline {
     }
     stage("Sonarqube Analysis") {
       steps {
-        script {
-          def scannerHome = tool 'sonarqube-scanner' // Replace with the name of your SonarScanner tool configured in Jenkins
-          withSonarQubeEnv('Sonarqube-Server') { // Replace 'My SonarQube Server' with the actual installation name
-            sh "${SCANNER_HOME}/bin/sonar-scanner" // Or the command for your specific scanner
-          }
+        withSonarQubeEnv('Sonarqube-Server') {
+          sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Upscale-Banking \
+          -Dsonar.projectKey=Upscale-Banking'''
         }
       }
     }
