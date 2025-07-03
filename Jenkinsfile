@@ -26,13 +26,8 @@ pipeline {
     }
     stage("Sonarqube Analysis") {
       steps {
-<<<<<<< HEAD
         withSonarQubeEnv('sonarqube-scanner') {
           sh '''$SCANNER_HOME/bin/sonarqube-scanner -Dsonar.projectName=Upscale-Banking \
-=======
-        withSonarQubeEnv('Sonarqube-Token') {
-          sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Upscale-Banking \
->>>>>>> 5cd0f06f756d0bb5e154a9915396cc64457057f9
           -Dsonar.projectKey=Upscale-Banking'''
         }
       }
