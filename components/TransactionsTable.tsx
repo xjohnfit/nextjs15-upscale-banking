@@ -20,8 +20,6 @@ const CategoryBadge = ({ category }: CategoryBadgeProps) => {
 
 const TransactionsTable = ({ transactions }: TransactionTableProps) => {
 
-  console.log(transactions.map(t => t.category))
-
   return (
     <Table className="!border-DEFAULT !border-b-0 w-full">
       <TableHeader className="bg-[#f9fafb]">
