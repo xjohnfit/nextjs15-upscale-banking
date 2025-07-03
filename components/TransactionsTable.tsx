@@ -7,28 +7,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { transactionCategoryStyles } from "@/constants"
 import { cn, formatAmount, formatDateTime, getTransactionStatus, removeSpecialCharacters } from "@/lib/utils"
 
 const CategoryBadge = ({ category }: CategoryBadgeProps) => {
-  const {
-    borderColor,
-    backgroundColor,
-    textColor,
-    chipBackgroundColor,
-   } = transactionCategoryStyles[category as keyof typeof transactionCategoryStyles] || transactionCategoryStyles.default
-   
   return (
-    <div className={cn('category-badge', borderColor, chipBackgroundColor)}>
-      <div className={cn('size-2 rounded-full', backgroundColor)} />
-      <p className={cn('text-[12px] font-medium', textColor)}>{category.primary}</p>
+    <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1">
+      <div className="h-2 w-2 rounded-full bg-gray-400" />
+      <p className="text-xs font-medium text-gray-700">{category.primary}</p>
     </div>
   )
 } 
 
 const TransactionsTable = ({ transactions }: TransactionTableProps) => {
 
-  
+  console.log(transactions.map(t => t.category))
 
   return (
     <Table className="!border-DEFAULT !border-b-0 w-full">
