@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import PlaidLink from './PlaidLink';
 import { toast } from 'sonner';
+import PlaygroundInfo from './PlaygroundInfo';
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
@@ -178,6 +179,8 @@ const AuthForm = ({ type }: { type: string }) => {
               {type === 'sign-in' ? 'Sign up' : 'Sign in'}
             </Link>
           </footer>
+            <PlaygroundInfo />
+
         </>
       )}
     </section>
