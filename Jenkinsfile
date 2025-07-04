@@ -26,7 +26,7 @@ pipeline {
     }
     stage("Sonarqube Analysis") {
       steps {
-        withSonarQubeEnv('Sonarqube-Server') {
+        withSonarQubeEnv('sonarqube-server') {
           sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Upscale-Banking \
           -Dsonar.projectKey=Upscale-Banking'''
         }
