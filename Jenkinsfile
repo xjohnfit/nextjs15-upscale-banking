@@ -5,7 +5,7 @@ pipeline {
     nodejs 'node24'
   }
   environment {
-    SCANNER_HOME = tool 'sonarqube-scanner'
+    SCANNER_HOME = tool 'sonar-scanner'
     APP_NAME = 'nextjs15-upscale-banking'
     RELEASE = '1.0.0'
     DOCKER_USER = 'xjohnfit'
