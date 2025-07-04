@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'aquasec/trivy' // Specify the Trivy Docker image
+      args '-v $(pwd):/app' // Mount the current workspace into the container
+    }
+  }
   tools {
     jdk 'jdk21'
     nodejs 'node24'
