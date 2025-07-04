@@ -46,12 +46,7 @@ pipeline {
     }
     stage('Trivy Scan') {
       steps {
-        sh '''
-          docker run --rm \
-            -v $(pwd):/app \
-            -w /app \
-            aquasec/trivy fs /app --exit-code 0 --no-progress --format table -o /app/trivyfs.txt
-        '''
+        sh "trivy fs . > trivyfs.txt"
       }
     }
     stage('Archive Report') {
