@@ -44,11 +44,11 @@ pipeline {
         sh "npm install"
       }
     }
-    // stage('Trivy Scan') {
-    //   steps {
-    //     sh "trivy fs . > trivyfs.txt"
-    //   }
-    // }
+    stage('Trivy Scan') {
+      steps {
+        sh "trivy fs . > trivyfs.txt"
+      }
+    }
     stage('Archive Report') {
       steps {
         archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
