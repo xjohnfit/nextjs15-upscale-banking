@@ -44,15 +44,21 @@ pipeline {
         sh "npm install"
       }
     }
-    stage('TRIVY FS SCAN') {
+    stage('Trivy Scan') {
       steps {
         script {
           sh '''
             docker run --rm \
+              --network my-projects-network \
               -v $(pwd):/src \
               aquasec/trivy fs /src > trivyfs.txt
           '''
         }
+      }
+    }
+    stage('Archive Report') {
+      steps {
+        archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
       }
     }
   }
