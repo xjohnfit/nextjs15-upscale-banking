@@ -46,14 +46,7 @@ pipeline {
     }
     stage('Trivy Scan') {
       steps {
-        script {
-          sh '''
-            docker run --rm \
-              --network my-projects-network \
-              -v $(pwd):/src \
-              aquasec/trivy fs /src > trivyfs.txt
-          '''
-        }
+        sh "trivy fs . > trivyfs.txt"
       }
     }
     stage('Archive Report') {
