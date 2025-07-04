@@ -24,7 +24,7 @@ pipeline {
         git branch: 'main', url: 'https://github.com/xjohnfit/nextjs15-upscale-banking'
       }
     }
-    stage("Sonarqube Analysis") {
+    stage("SonarQube Analysis") {
       steps {
         withSonarQubeEnv('sonarqube-server') {
           sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Upscale-Banking \
