@@ -21,11 +21,13 @@ Upscale Banking is a sophisticated financial management platform that provides u
 ## 🛠️ Technologies Used
 
 ### Frontend Framework
+
 - **Next.js 15** - React framework with App Router for server-side rendering and routing
 - **React 18** - JavaScript library for building user interfaces
 - **TypeScript** - Type-safe JavaScript development
 
 ### Styling & UI
+
 - **Tailwind CSS** - Utility-first CSS framework for rapid UI development
 - **Radix UI** - Low-level UI primitives for accessible components
 - **Lucide React** - Beautiful & consistent icon library
@@ -33,20 +35,24 @@ Upscale Banking is a sophisticated financial management platform that provides u
 - **React Chart.js 2** - React wrapper for Chart.js
 
 ### Backend & Database
+
 - **Appwrite** - Backend-as-a-Service for authentication, database, and file storage
 - **Node Appwrite** - Server-side Appwrite SDK
 
 ### Financial Services
+
 - **Plaid** - Bank account linking and transaction data
 - **Dwolla** - ACH payment processing and money transfers
 - **React Plaid Link** - React component for Plaid Link integration
 
 ### Forms & Validation
+
 - **React Hook Form** - Performant forms with easy validation
 - **Zod** - TypeScript-first schema validation
 - **Hookform Resolvers** - Validation resolvers for React Hook Form
 
 ### State Management & Utilities
+
 - **Query String** - URL query parameter parsing
 - **React CountUp** - Animated number counting
 - **Class Variance Authority** - Utility for creating variant-based component APIs
@@ -54,10 +60,12 @@ Upscale Banking is a sophisticated financial management platform that provides u
 - **CLSX** - Utility for constructing className strings
 
 ### Monitoring & Analytics
+
 - **Sentry** - Error tracking and performance monitoring
 - **Next Themes** - Theme management for dark/light mode
 
 ### UI Components
+
 - **Sonner** - Toast notifications
 - **Tailwind CSS Animate** - Animation utilities
 
@@ -140,12 +148,14 @@ SENTRY_DSN=your-sentry-dsn
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/xjohnfit/nextjs15-upscale-banking
    cd nextjs15-upscale-banking
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    # or
@@ -159,6 +169,7 @@ SENTRY_DSN=your-sentry-dsn
    - Fill in your API keys and configuration values
 
 4. **Run the development server:**
+
    ```bash
    npm run dev
    # or
@@ -180,21 +191,25 @@ SENTRY_DSN=your-sentry-dsn
 ## 🏗️ Architecture
 
 ### Authentication Flow
+
 1. Users sign up/sign in through Appwrite authentication
 2. Session management with secure cookies
 3. Protected routes with middleware
 
 ### Banking Integration
+
 1. Plaid Link for secure bank account connection
 2. Real-time transaction syncing
 3. Account balance updates
 
 ### Payment Processing
+
 1. Dwolla integration for ACH transfers
 2. Secure payment verification
 3. Transaction status tracking
 
 ### Data Management
+
 1. Appwrite database for user data
 2. Real-time synchronization
 3. Optimistic updates for better UX
@@ -211,6 +226,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 📱 Responsive Design
 
 The application is fully responsive and optimized for:
+
 - 📱 Mobile devices (320px+)
 - 📱 Tablets (768px+)
 - 💻 Desktop (1024px+)
@@ -238,4 +254,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Built with ❤️ using Next.js 15, Appwrite, Plaid, and Dwolla**
+### Built with ❤️ using Next.js 15, Appwrite, Plaid, and Dwolla
