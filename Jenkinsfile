@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'aquasec/trivy' // Specify the Trivy Docker image
-      args '-v $(pwd):/app' // Mount the current workspace into the container
-    }
-  }
+  agent any
   tools {
     jdk 'jdk21'
     nodejs 'node24'
@@ -51,7 +46,11 @@ pipeline {
     }
     stage('Trivy Scan') {
       steps {
-        sh 'docker run --rm -v $(pwd):/app aquasec/trivy fs . > trivyfs.txt'
+        sh '''
+          docker run --rm \
+            -v $(pwd):/app \
+            -w /app \
+            aquasec/trivy fs /app --exit-code 0 --no-progress --format table -o /app/trivyfs.txt
       }
     }
     stage('Archive Report') {
