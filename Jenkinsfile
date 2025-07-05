@@ -49,11 +49,6 @@ pipeline {
                 sh "trivy fs . > trivyfs.txt"
             }
         }
-        stage('Archive Report') {
-            steps {
-                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
-            }
-        }
         stage("Build & Push Docker Image") {
             steps {
                 script {
