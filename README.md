@@ -104,6 +104,7 @@ Upscale Banking is a sophisticated financial management platform that provides u
 ├── types/                       # TypeScript type definitions
 ├── constants/                   # Application constants
 ├── public/                      # Static assets
+├── Jenkinsfile                  # CI/CD pipeline configuration
 └── config files                 # Next.js, Tailwind, TypeScript configs
 ```
 
@@ -214,6 +215,35 @@ SENTRY_DSN=your-sentry-dsn
 2. Real-time synchronization
 3. Optimistic updates for better UX
 
+## � CI/CD Pipeline
+
+This project includes a comprehensive Jenkins pipeline for automated testing, security scanning, and deployment:
+
+### Pipeline Stages
+
+1. **🧹 Clean Workspace** - Ensures a clean build environment
+2. **📥 Checkout from Git** - Pulls the latest code from the main branch
+3. **🔍 SonarQube Analysis** - Code quality and security analysis
+4. **🚦 Quality Gate** - Ensures code meets quality standards
+5. **📦 Install Dependencies** - Installs npm packages
+6. **�🔒 Trivy Security Scan** - Vulnerability scanning for dependencies
+7. **📋 Archive Reports** - Saves security scan reports as artifacts
+
+### Pipeline Configuration
+
+- **Runtime Environment**: Java 21, Node.js 24
+- **Code Quality**: SonarQube integration with quality gates
+- **Security Scanning**: Trivy filesystem scanning
+- **Artifact Management**: Automated report archiving
+- **Version Control**: GitHub integration with automated triggers
+
+### DevOps Tools
+
+- **Jenkins** - CI/CD automation platform
+- **SonarQube** - Code quality and security analysis
+- **Trivy** - Vulnerability scanner for containers and filesystems
+- **Docker** - Containerization (configured for future deployment)
+
 ## 🔒 Security Features
 
 - **Server-side authentication** with Appwrite
@@ -222,6 +252,8 @@ SENTRY_DSN=your-sentry-dsn
 - **Type-safe API calls** with TypeScript
 - **Input validation** with Zod schemas
 - **Error tracking** with Sentry
+- **Automated security scanning** with Trivy
+- **Code quality checks** with SonarQube
 
 ## 📱 Responsive Design
 
