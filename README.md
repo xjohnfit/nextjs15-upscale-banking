@@ -242,7 +242,6 @@ This project includes a comprehensive Jenkins pipeline for automated testing, se
 - **Jenkins** - CI/CD automation platform
 - **SonarQube** - Code quality and security analysis
 - **Trivy** - Vulnerability scanner for containers and filesystems
-- **Docker** - Containerization (configured for future deployment)
 
 ## 🔒 Security Features
 
