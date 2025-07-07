@@ -10,7 +10,7 @@ pipeline {
         RELEASE = '1.0.0'
         DOCKER_USER = 'xjohnfit'
         DOCKER_PASS = 'dockerhub'
-        IMAGE_NAME = "${APP_NAME}"
+        IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
     stages {
