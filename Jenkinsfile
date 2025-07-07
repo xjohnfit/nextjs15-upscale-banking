@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        jdk 'jdk21'
+        jdk 'jdk17'
         nodejs 'node24'
     }
     environment {
@@ -35,7 +35,7 @@ pipeline {
         stage("Quality Gate") {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonarqube-Token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
         }
