@@ -15,6 +15,9 @@ spec:
       containers:
         - name: upscale-banking
           image: xjohnfit/nextjs15-upscale-banking:1.0.0-8
+          envFrom:
+            - configMapRef:
+              name: upscale-banking-env
           resources:
             limits:
               cpu: "1"
