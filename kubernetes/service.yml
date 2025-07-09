@@ -5,10 +5,8 @@ metadata:
   labels:
     app: upscale-banking
 spec:
-  type: NodePort
   ports:
-  - port: 80
-    targetPort: 80
-    nodePort: 30007
+  - port: 5004
+    targetPort: 5004
   selector:
     app: upscale-banking
