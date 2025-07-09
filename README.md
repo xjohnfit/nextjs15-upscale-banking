@@ -127,17 +127,10 @@ Upscale Banking is a sophisticated financial management platform that provides u
 ├── sentry.edge.config.ts        # Sentry edge runtime configuration
 ├── instrumentation.ts           # Next.js instrumentation setup
 └── config files                 # Next.js, Tailwind, TypeScript configs
-```
 │   │   └── transaction.actions.ts # Transaction handling
 │   ├── appwrite.ts              # Appwrite configuration
 │   ├── plaid.ts                 # Plaid API setup
 │   └── utils.ts                 # Utility functions
-├── types/                       # TypeScript type definitions
-├── constants/                   # Application constants
-├── public/                      # Static assets
-├── Jenkinsfile                  # CI/CD pipeline configuration
-└── config files                 # Next.js, Tailwind, TypeScript configs
-```
 
 ## 🚀 Getting Started
 
