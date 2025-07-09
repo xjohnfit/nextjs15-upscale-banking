@@ -22,3 +22,5 @@ spec:
               cpu: "500m"
           ports:
             - containerPort: 5004
+      imagePullSecrets:
+        - name: regcred
