@@ -15,9 +15,6 @@ spec:
       containers:
         - name: upscale-banking
           image: xjohnfit/nextjs15-upscale-banking:1.0.0-8
-          envFrom:
-            - configMapRef:
-              name: upscale-banking-env
           resources:
             limits:
               cpu: "1"
@@ -25,5 +22,8 @@ spec:
               cpu: "500m"
           ports:
             - containerPort: 5004
+          envFrom:
+            - secretRef:
+                name: upscale-banking-secret
       imagePullSecrets:
         - name: regcred
