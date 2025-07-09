@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
         - name: upscale-banking
-          image: xjohnfit/nextjs15-upscale-banking:1.0.0-1
+          image: xjohnfit/nextjs15-upscale-banking:latest
           resources:
             limits:
               cpu: "1"
             requests:
               cpu: "500m"
           ports:
-            - containerPort: 3000
+            - containerPort: 5004
