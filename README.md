@@ -1,10 +1,10 @@
 # 🏦 Upscale Banking - Next.js 15 Banking Application
 
-A modern, full-stack banking application built with Next.js 15, featuring real-time transactions, secure authentication, and comprehensive financial management tools.
+A modern, full-stack banking application built with Next.js 15, featuring real-time transactions, secure authentication, comprehensive financial management tools, and enterprise-grade CI/CD deployment.
 
 ## 🚀 Project Overview
 
-Upscale Banking is a sophisticated financial management platform that provides users with a complete banking experience. The application integrates with real banking APIs through Plaid, offers secure payment processing via Dwolla, and maintains robust data management with Appwrite.
+Upscale Banking is a sophisticated financial management platform that provides users with a complete banking experience. The application integrates with real banking APIs through Plaid, offers secure payment processing via Dwolla, maintains robust data management with Appwrite, and includes comprehensive DevOps practices with automated CI/CD pipelines, containerization, and Kubernetes deployment capabilities.
 
 ### ✨ Key Features
 
@@ -17,6 +17,11 @@ Upscale Banking is a sophisticated financial management platform that provides u
 - **🎨 Modern UI**: Clean, intuitive interface with Radix UI components
 - **📈 Transaction History**: Comprehensive transaction tracking and categorization
 - **🔄 Real-time Updates**: Live balance updates and transaction notifications
+- **🚀 CI/CD Pipeline**: Automated testing, security scanning, and deployment
+- **🐳 Containerized**: Docker support for consistent deployments
+- **☸️ Kubernetes Ready**: Production-ready Kubernetes manifests
+- **📊 Monitoring**: Integrated Sentry for error tracking and performance monitoring
+- **🔒 Security Scanning**: Automated vulnerability scanning with Trivy and OWASP
 
 ## 🛠️ Technologies Used
 
@@ -61,8 +66,17 @@ Upscale Banking is a sophisticated financial management platform that provides u
 
 ### Monitoring & Analytics
 
-- **Sentry** - Error tracking and performance monitoring
+- **Sentry** - Error tracking and performance monitoring with real-time alerts
 - **Next Themes** - Theme management for dark/light mode
+
+### DevOps & Deployment
+
+- **Jenkins** - CI/CD automation with comprehensive pipeline stages
+- **Docker** - Multi-stage containerization for optimized production builds
+- **Kubernetes** - Container orchestration with deployment and service manifests
+- **SonarQube** - Code quality analysis and technical debt management
+- **Trivy** - Container and filesystem vulnerability scanning
+- **OWASP Dependency Check** - Security vulnerability assessment for dependencies
 
 ### UI Components
 
@@ -97,6 +111,23 @@ Upscale Banking is a sophisticated financial management platform that provides u
 │   ├── actions/                 # Server actions
 │   │   ├── bank.actions.ts      # Bank-related operations
 │   │   ├── user.actions.ts      # User management
+│   │   └── transaction.actions.ts # Transaction handling
+│   ├── appwrite.ts              # Appwrite configuration
+│   ├── plaid.ts                 # Plaid API setup
+│   └── utils.ts                 # Utility functions
+├── types/                       # TypeScript type definitions
+├── constants/                   # Application constants
+├── kubernetes/                  # Kubernetes deployment manifests
+│   ├── deployment.yml           # Kubernetes deployment configuration
+│   └── service.yml              # Kubernetes service configuration
+├── public/                      # Static assets
+├── Dockerfile                   # Multi-stage Docker build configuration
+├── Jenkinsfile                  # CI/CD pipeline configuration
+├── sentry.server.config.ts      # Sentry server-side configuration
+├── sentry.edge.config.ts        # Sentry edge runtime configuration
+├── instrumentation.ts           # Next.js instrumentation setup
+└── config files                 # Next.js, Tailwind, TypeScript configs
+```
 │   │   └── transaction.actions.ts # Transaction handling
 │   ├── appwrite.ts              # Appwrite configuration
 │   ├── plaid.ts                 # Plaid API setup
@@ -142,8 +173,14 @@ DWOLLA_SECRET=your-dwolla-secret
 DWOLLA_BASE_URL=https://api-sandbox.dwolla.com
 DWOLLA_ENV=sandbox
 
-# Sentry Configuration (Optional)
+# Sentry Configuration (for error tracking and monitoring)
 SENTRY_DSN=your-sentry-dsn
+SENTRY_ORG=your-sentry-org
+SENTRY_PROJECT=your-sentry-project
+
+# Jenkins CI/CD Configuration (for automated deployments)
+DOCKER_USER=your-dockerhub-username
+DOCKER_PASS=your-dockerhub-password-or-token
 ```
 
 ### Installation
@@ -184,10 +221,69 @@ SENTRY_DSN=your-sentry-dsn
 
 ## 🔧 Available Scripts
 
-- `npm run dev` - Start development server
+- `npm run dev` - Start development server on port 3000
 - `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm run start` - Start production server on port 5004
 - `npm run lint` - Run ESLint for code quality
+
+## 🐳 Docker Support
+
+### Building the Docker Image
+
+```bash
+docker build -t upscale-banking .
+```
+
+### Running with Docker
+
+```bash
+docker run -p 3000:5004 --env-file .env.local upscale-banking
+```
+
+### Multi-stage Build Benefits
+
+- **Optimized Size**: Uses Alpine Linux for minimal image footprint
+- **Security**: Separate build and runtime environments
+- **Performance**: Production-optimized dependencies only
+
+## ☸️ Kubernetes Deployment
+
+### Prerequisites
+
+- Kubernetes cluster (local or cloud)
+- kubectl configured
+- Docker registry access
+
+### Deploy to Kubernetes
+
+1. **Create namespace and secrets:**
+
+   ```bash
+   kubectl create namespace banking-app
+   kubectl create secret generic upscale-banking-secret \
+     --from-env-file=.env.local \
+     -n banking-app
+   ```
+
+2. **Deploy the application:**
+
+   ```bash
+   kubectl apply -f kubernetes/ -n banking-app
+   ```
+
+3. **Check deployment status:**
+
+   ```bash
+   kubectl get pods -n banking-app
+   kubectl get services -n banking-app
+   ```
+
+### Kubernetes Features
+
+- **Horizontal Scaling**: Ready for pod autoscaling
+- **Resource Management**: CPU and memory limits configured
+- **Secret Management**: Environment variables via Kubernetes secrets
+- **Service Discovery**: NodePort service for external access
 
 ## 🏗️ Architecture
 
@@ -215,33 +311,52 @@ SENTRY_DSN=your-sentry-dsn
 2. Real-time synchronization
 3. Optimistic updates for better UX
 
-## � CI/CD Pipeline
+## 🚀 CI/CD Pipeline
 
-This project includes a comprehensive Jenkins pipeline for automated testing, security scanning, and deployment:
+This project includes a comprehensive Jenkins pipeline for automated testing, security scanning, and deployment with enterprise-grade DevOps practices.
 
 ### Pipeline Stages
 
 1. **🧹 Clean Workspace** - Ensures a clean build environment
 2. **📥 Checkout from Git** - Pulls the latest code from the main branch
-3. **🔍 SonarQube Analysis** - Code quality and security analysis
-4. **🚦 Quality Gate** - Ensures code meets quality standards
-5. **📦 Install Dependencies** - Installs npm packages
-6. **�🔒 Trivy Security Scan** - Vulnerability scanning for dependencies
-7. **📋 Archive Reports** - Saves security scan reports as artifacts
+3. **🔍 SonarQube Analysis** - Comprehensive code quality and security analysis
+4. **🚦 Quality Gate** - Ensures code meets predefined quality standards
+5. **📦 Install Dependencies** - Installs npm packages with caching
+6. **�️ OWASP Dependency Check** - Scans for known vulnerabilities in dependencies
+7. **🔒 Trivy Filesystem Scan** - Security vulnerability scanning for source code
+8. **🐳 Docker Build & Push** - Multi-stage Docker image creation and registry push
+9. **� Trivy Image Scan** - Container image vulnerability assessment
+10. **🧹 Cleanup Artifacts** - Removes local Docker images to save space
+11. **📧 Email Notifications** - Automated build status notifications with reports
 
 ### Pipeline Configuration
 
 - **Runtime Environment**: Java 21, Node.js 24
-- **Code Quality**: SonarQube integration with quality gates
-- **Security Scanning**: Trivy filesystem scanning
-- **Artifact Management**: Automated report archiving
-- **Version Control**: GitHub integration with automated triggers
+- **Code Quality**: SonarQube integration with quality gates and technical debt tracking
+- **Security Scanning**:
+  - Trivy for filesystem and container image vulnerability scanning
+  - OWASP Dependency Check for third-party library security assessment
+- **Container Registry**: DockerHub integration with automated image versioning
+- **Artifact Management**: Automated report archiving and email delivery
+- **Version Control**: GitHub integration with webhook triggers
+- **Notification System**: Email alerts with detailed build reports and scan results
 
-### DevOps Tools
+### DevOps Tools Integration
 
-- **Jenkins** - CI/CD automation platform
-- **SonarQube** - Code quality and security analysis
-- **Trivy** - Vulnerability scanner for containers and filesystems
+- **Jenkins** - CI/CD automation platform with declarative pipeline
+- **SonarQube** - Static code analysis, code coverage, and security vulnerability detection
+- **Trivy** - Comprehensive vulnerability scanner for containers and filesystems
+- **OWASP Dependency Check** - Security vulnerability assessment for project dependencies
+- **Docker** - Containerization with multi-stage builds for production optimization
+- **DockerHub** - Container image registry with automated versioning
+
+### Security & Quality Gates
+
+- **Automated Quality Checks**: Code coverage thresholds and maintainability ratings
+- **Security Vulnerability Scanning**: Critical and high-severity vulnerability detection
+- **Dependency Security**: Third-party library vulnerability assessment
+- **Container Security**: Base image and application layer security scanning
+- **Build Notifications**: Immediate alerts for failed builds or security issues
 
 ## 🔒 Security Features
 
@@ -250,9 +365,39 @@ This project includes a comprehensive Jenkins pipeline for automated testing, se
 - **CSRF protection** with Next.js built-in features
 - **Type-safe API calls** with TypeScript
 - **Input validation** with Zod schemas
-- **Error tracking** with Sentry
-- **Automated security scanning** with Trivy
-- **Code quality checks** with SonarQube
+- **Real-time error tracking** with Sentry integration
+- **Automated security scanning** with Trivy and OWASP Dependency Check
+- **Code quality checks** with SonarQube static analysis
+- **Container security** with multi-stage Docker builds
+- **Dependency vulnerability assessment** with automated scanning
+- **Secure secret management** via Kubernetes secrets
+- **Production monitoring** with comprehensive logging and alerting
+
+## � Monitoring & Observability
+
+### Sentry Integration
+
+The application includes comprehensive error tracking and performance monitoring:
+
+- **Real-time Error Tracking**: Automatic capture and reporting of JavaScript and server errors
+- **Performance Monitoring**: Application performance insights and optimization recommendations
+- **User Session Tracking**: Monitor user interactions and identify problematic workflows
+- **Custom Alerts**: Configurable notifications for critical errors and performance degradation
+- **Release Tracking**: Monitor deployment impact on application stability
+
+### Configuration Files
+
+- `sentry.server.config.ts` - Server-side error tracking configuration
+- `sentry.edge.config.ts` - Edge runtime monitoring setup
+- `instrumentation.ts` - Next.js instrumentation for automatic error capture
+
+### Monitoring Features
+
+- **Error Aggregation**: Intelligent grouping of similar errors
+- **Performance Insights**: Page load times, API response times, and database query performance
+- **User Impact Analysis**: Understanding how errors affect user experience
+- **Integration Dashboards**: Custom dashboards for business metrics
+- **Automated Alerting**: Slack, email, and webhook notifications
 
 ## 📱 Responsive Design
 
@@ -262,6 +407,40 @@ The application is fully responsive and optimized for:
 - 📱 Tablets (768px+)
 - 💻 Desktop (1024px+)
 - 🖥️ Large screens (1440px+)
+
+## 🚀 Production Deployment
+
+### Deployment Strategies
+
+The application supports multiple deployment strategies:
+
+1. **Traditional Server Deployment**
+   - Direct deployment on VPS or dedicated servers
+   - PM2 process management for Node.js applications
+   - Nginx reverse proxy configuration
+
+2. **Containerized Deployment**
+   - Docker containerization with multi-stage builds
+   - DockerHub registry for image distribution
+   - Environment-specific configuration management
+
+3. **Kubernetes Orchestration**
+   - Production-ready Kubernetes manifests
+   - Horizontal pod autoscaling capabilities
+   - Rolling updates with zero downtime
+   - Secret management and configuration injection
+
+4. **Cloud Platform Deployment**
+   - Compatible with AWS, GCP, Azure
+   - Vercel deployment for seamless Next.js hosting
+   - Serverless deployment options
+
+### Scaling Considerations
+
+- **Horizontal Scaling**: Load balancing across multiple instances
+- **Database Scaling**: Appwrite cloud scaling capabilities
+- **CDN Integration**: Static asset optimization and global distribution
+- **Performance Optimization**: Image optimization, code splitting, and caching strategies
 
 ## 🤝 Contributing
 
@@ -277,12 +456,21 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Next.js team for the amazing framework
-- Appwrite for backend services
-- Plaid for banking API integration
-- Dwolla for payment processing
-- All open-source contributors
+- **Next.js Team** for the amazing React framework and App Router
+- **Appwrite** for providing comprehensive backend services
+- **Plaid** for secure banking API integration
+- **Dwolla** for reliable payment processing
+- **Sentry** for exceptional error tracking and monitoring
+- **Jenkins Community** for the robust CI/CD automation platform
+- **SonarQube** for code quality and security analysis tools
+- **Aqua Security** for the Trivy vulnerability scanner
+- **OWASP** for dependency security checking tools
+- **Docker** for containerization technology
+- **Kubernetes** for container orchestration
+- **All open-source contributors** who make modern development possible
 
 ---
 
-### Built with ❤️ using Next.js 15, Appwrite, Plaid, and Dwolla
+### Built with ❤️ using Next.js 15, Appwrite, Plaid, Dwolla, and Enterprise DevOps Practices
+
+**Features**: Full-stack banking application • Real-time transactions • Secure authentication • CI/CD pipeline • Docker containerization • Kubernetes deployment • Comprehensive monitoring • Security scanning
