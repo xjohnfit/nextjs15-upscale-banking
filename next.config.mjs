@@ -7,6 +7,9 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Enable standalone output for Docker deployment
+    output: 'standalone',
+
     typescript: {
         ignoreBuildErrors: true,
     },
