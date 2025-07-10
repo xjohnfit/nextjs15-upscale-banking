@@ -131,6 +131,7 @@ Upscale Banking is a sophisticated financial management platform that provides u
 │   ├── appwrite.ts              # Appwrite configuration
 │   ├── plaid.ts                 # Plaid API setup
 │   └── utils.ts                 # Utility functions
+```
 
 ## 🚀 Getting Started
 
