@@ -5,6 +5,7 @@ import { Inter, IBM_Plex_Serif } from 'next/font/google';
 import './globals.css';
 
 import { Toaster } from '@/components/ui/sonner';
+import '@/lib/env-validation'; // Runtime environment validation
 
 import * as Sentry from '@sentry/nextjs';
 
@@ -35,7 +36,7 @@ export default function RootLayout({
         <html lang='en'>
             <body className={`${inter.variable} ${ibmPlexSerif.variable}`}>
                 {children}
-                <Toaster position="bottom-center" />
+                <Toaster position='bottom-center' />
             </body>
         </html>
     );
