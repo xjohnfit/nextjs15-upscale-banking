@@ -48,6 +48,22 @@ COPY --from=deps /app/node_modules ./node_modules
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Set dummy environment variables for build process
+ENV NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+ENV NEXT_PUBLIC_APPWRITE_PROJECT=build-dummy-project
+ENV NEXT_APPWRITE_KEY=build-dummy-key
+ENV APPWRITE_DATABASE_ID=build-dummy-db
+ENV APPWRITE_USER_COLLECTION_ID=build-dummy-users
+ENV APPWRITE_BANK_COLLECTION_ID=build-dummy-banks
+ENV APPWRITE_TRANSACTION_COLLECTION_ID=build-dummy-transactions
+ENV PLAID_CLIENT_ID=build-dummy-plaid
+ENV PLAID_SECRET=build-dummy-secret
+ENV PLAID_ENV=sandbox
+ENV DWOLLA_KEY=build-dummy-dwolla
+ENV DWOLLA_SECRET=build-dummy-secret
+ENV DWOLLA_BASE_URL=https://api-sandbox.dwolla.com
+ENV DWOLLA_ENV=sandbox
+
 # Build the Next.js application
 RUN npm run build
 
