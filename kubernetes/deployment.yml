@@ -19,7 +19,7 @@ spec:
             limits:
               cpu: "1"
             requests:
-              cpu: "500m"
+              cpu: "200m"
           ports:
             - containerPort: 5004
           envFrom:
