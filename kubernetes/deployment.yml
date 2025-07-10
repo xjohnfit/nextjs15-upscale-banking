@@ -24,6 +24,6 @@ spec:
             - containerPort: 5004
           envFrom:
             - secretRef:
-                name: upscale-banking-secret
+                name: upscale-env
       imagePullSecrets:
         - name: regcred
