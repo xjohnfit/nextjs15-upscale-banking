@@ -50,6 +50,7 @@ export const signIn = async ({ email, password }: signInProps) => {
             email,
             password
         );
+
         const cookie = (await cookies()).set(
             'appwrite-session',
             session.secret,
@@ -76,8 +77,8 @@ export const signIn = async ({ email, password }: signInProps) => {
 
         return parseStringify(user);
     } catch (error) {
-        console.error('Error', error);
-        throw error; // Re-throw so frontend knows there was an error
+        console.error('Sign in error:', error);
+        return null; // Return null instead of throwing to handle gracefully in frontend
     }
 };
 
@@ -157,7 +158,7 @@ export async function getLoggedInUser() {
 
         return parseStringify(user);
     } catch (error) {
-        console.log(error);
+        console.log('Get logged in user error:', error);
         return null;
     }
 }
