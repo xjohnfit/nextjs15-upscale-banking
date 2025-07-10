@@ -1,4 +1,4 @@
-FROM node:19-alpine3.15
+FROM node:24
 
 WORKDIR /upscale-banking
 
