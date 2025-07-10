@@ -6,7 +6,7 @@ import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 
 const Home = async (props: SearchParamProps) => {
-  const searchParams = await props.searchParams;
+  const searchParams = props.searchParams;
 
   const {
     id,
@@ -14,51 +14,103 @@ const Home = async (props: SearchParamProps) => {
   } = searchParams;
 
   const currentPage = Number(page as string) || 1;
-  const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn.$id,
-  })
+  
+  try {
+    const loggedIn = await getLoggedInUser();
+    
+    if (!loggedIn) {
+      return (
+        <section className="home">
+          <div className="home-content">
+            <header className="home-header">
+              <HeaderBox 
+                type="greeting"
+                title="Welcome"
+                user="Guest"
+                subtext="Please sign in to access your banking dashboard."
+              />
+            </header>
+          </div>
+        </section>
+      );
+    }
 
-  if(!accounts) return;
+    const accounts = await getAccounts({ 
+      userId: loggedIn.$id,
+    })
 
-  const accountsData = accounts?.data;
-  const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
+    if(!accounts) {
+      return (
+        <section className="home">
+          <div className="home-content">
+            <header className="home-header">
+              <HeaderBox 
+                type="greeting"
+                title="Welcome"
+                user={loggedIn?.firstName || 'Guest'}
+                subtext="No bank accounts found. Please connect a bank account to get started."
+              />
+            </header>
+          </div>
+        </section>
+      );
+    }
 
-  const account = await getAccount({ appwriteItemId })
+    const accountsData = accounts?.data;
+    const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
 
-  return (
-    <section className="home">
-      <div className="home-content">
-        <header className="home-header">
-          <HeaderBox 
-            type="greeting"
-            title="Welcome"
-            user={loggedIn?.firstName || 'Guest'}
-            subtext="Access and manage your account and transactions efficiently."
-          />
+    const account = await getAccount({ appwriteItemId })
 
-          <TotalBalanceBox 
+    return (
+      <section className="home">
+        <div className="home-content">
+          <header className="home-header">
+            <HeaderBox 
+              type="greeting"
+              title="Welcome"
+              user={loggedIn?.firstName || 'Guest'}
+              subtext="Access and manage your account and transactions efficiently."
+            />
+
+            <TotalBalanceBox 
+              accounts={accountsData}
+              totalBanks={accounts?.totalBanks}
+              totalCurrentBalance={accounts?.totalCurrentBalance}
+            />
+          </header>
+
+          <RecentTransactions 
             accounts={accountsData}
-            totalBanks={accounts?.totalBanks}
-            totalCurrentBalance={accounts?.totalCurrentBalance}
+            transactions={account?.transactions}
+            appwriteItemId={appwriteItemId}
+            page={currentPage}
           />
-        </header>
+        </div>
 
-        <RecentTransactions 
-          accounts={accountsData}
+        <RightSidebar 
+          user={loggedIn}
           transactions={account?.transactions}
-          appwriteItemId={appwriteItemId}
-          page={currentPage}
+          banks={accountsData?.slice(0, 2)}
         />
-      </div>
-
-      <RightSidebar 
-        user={loggedIn}
-        transactions={account?.transactions}
-        banks={accountsData?.slice(0, 2)}
-      />
-    </section>
-  )
+      </section>
+    )
+  } catch (error) {
+    console.error('Error loading home page:', error);
+    return (
+      <section className="home">
+        <div className="home-content">
+          <header className="home-header">
+            <HeaderBox 
+              type="greeting"
+              title="Welcome"
+              user="Guest"
+              subtext="Unable to load banking data. Please try again later."
+            />
+          </header>
+        </div>
+      </section>
+    );
+  }
 }
 
 export default Home

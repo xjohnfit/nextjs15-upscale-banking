@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
+    "build:production": "bash scripts/build.sh",
+    "build:windows": "scripts\\build.bat",
     "start": "next start -p 5004",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

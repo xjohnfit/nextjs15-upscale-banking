@@ -1,31 +1,64 @@
-import HeaderBox from '@/components/HeaderBox'
-import PaymentTransferForm from '@/components/PaymentTransferForm'
+import HeaderBox from '@/components/HeaderBox';
+import PaymentTransferForm from '@/components/PaymentTransferForm';
 import { getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
-import React from 'react'
+import React from 'react';
 
 const Transfer = async () => {
-  const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn.$id 
-  })
+    try {
+        const loggedIn = await getLoggedInUser();
 
-  if(!accounts) return;
-  
-  const accountsData = accounts?.data;
+        if (!loggedIn) {
+            return (
+                <section className='payment-transfer'>
+                    <HeaderBox
+                        title='Payment Transfer'
+                        subtext='Please sign in to access payment transfer functionality'
+                    />
+                </section>
+            );
+        }
 
-  return (
-    <section className="payment-transfer">
-      <HeaderBox 
-        title="Payment Transfer"
-        subtext="Please provide any specific details or notes related to the payment transfer"
-      />
+        const accounts = await getAccounts({
+            userId: loggedIn.$id,
+        });
 
-      <section className="size-full pt-5">
-        <PaymentTransferForm accounts={accountsData} />
-      </section>
-    </section>
-  )
-}
+        if (!accounts) {
+            return (
+                <section className='payment-transfer'>
+                    <HeaderBox
+                        title='Payment Transfer'
+                        subtext='No bank accounts found. Please connect a bank account to transfer funds.'
+                    />
+                </section>
+            );
+        }
 
-export default Transfer
+        const accountsData = accounts?.data;
+
+        return (
+            <section className='payment-transfer'>
+                <HeaderBox
+                    title='Payment Transfer'
+                    subtext='Please provide any specific details or notes related to the payment transfer'
+                />
+
+                <section className='size-full pt-5'>
+                    <PaymentTransferForm accounts={accountsData} />
+                </section>
+            </section>
+        );
+    } catch (error) {
+        console.error('Error loading payment transfer page:', error);
+        return (
+            <section className='payment-transfer'>
+                <HeaderBox
+                    title='Payment Transfer'
+                    subtext='Unable to load payment transfer. Please try again later.'
+                />
+            </section>
+        );
+    }
+};
+
+export default Transfer;
