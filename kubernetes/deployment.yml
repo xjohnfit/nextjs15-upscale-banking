@@ -21,7 +21,7 @@ spec:
             requests:
               cpu: "200m"
           ports:
-            - containerPort: 5004
+            - containerPort: 3000
           envFrom:
             - secretRef:
                 name: upscale-banking-secret
