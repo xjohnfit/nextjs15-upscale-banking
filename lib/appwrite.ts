@@ -40,6 +40,7 @@ export async function createAdminClient() {
     const client = new Client()
         .setEndpoint(endpoint)
         .setProject(project)
+        .setSelfSigned(true) // <—— THIS IS CRUCIAL FOR HTTP CONNECTIONS/ REMOVE FOR HTTPS
         .setKey(key);
 
     return {
