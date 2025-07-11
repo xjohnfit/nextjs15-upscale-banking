@@ -115,11 +115,7 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                 <Button
                     onClick={handleClick}
                     disabled={isDisabled}
-                    className={
-                        type === 'mobile'
-                            ? 'plaidlink-mobile'
-                            : 'plaidlink-primary'
-                    }>
+                    className='plaidlink-primary'>
                     {loading
                         ? 'Connecting...'
                         : ready

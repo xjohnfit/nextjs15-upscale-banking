@@ -7,7 +7,6 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import AuthDebug from '@/components/AuthDebug';
 import '@/lib/env-validation'; // Runtime environment validation
-import '@/lib/dev-warnings'; // Suppress development warnings
 
 import * as Sentry from '@sentry/nextjs';
 

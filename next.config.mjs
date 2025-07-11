@@ -17,22 +17,16 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
 
-    // React 19 compatibility
-    experimental: {
-        ppr: false,
-    },
-
-    // Webpack configuration
-    webpack: (config, { isServer, dev }) => {
-        config.resolve.alias['@'] = path.resolve(__dirname);
-        return config;
-    },
-
     // Environment variables validation
     env: {
         NEXT_PUBLIC_APPWRITE_ENDPOINT:
             process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
         NEXT_PUBLIC_APPWRITE_PROJECT: process.env.NEXT_PUBLIC_APPWRITE_PROJECT,
+    },
+
+    webpack(config) {
+        config.resolve.alias['@'] = path.resolve(__dirname);
+        return config;
     },
 };
 
