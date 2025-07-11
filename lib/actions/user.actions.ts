@@ -79,7 +79,7 @@ export const signIn = async ({ email, password }: signInProps) => {
                 path: '/',
                 httpOnly: true,
                 sameSite: 'lax',
-                secure: process.env.NODE_ENV === 'production',
+                secure: false, // Don't use secure for HTTP connections
                 maxAge: 60 * 60,
             });
             console.log('Test cookie set successfully');
@@ -88,16 +88,18 @@ export const signIn = async ({ email, password }: signInProps) => {
         }
 
         // Now set the actual session cookie
+        // Fix: Don't use secure cookies on HTTP connections
+        const isSecureConnection = process.env.FORCE_SECURE_COOKIES === 'true' || false; // Force false for HTTP production
+        
         const cookieOptions = {
             path: '/',
             httpOnly: true,
             sameSite: 'lax' as const,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isSecureConnection, // Only secure if actually using HTTPS
             maxAge: 60 * 60 * 24 * 30, // 30 days
-            domain:
-                process.env.NODE_ENV === 'production' ? undefined : undefined, // Let browser decide
         };
         console.log('Cookie options:', cookieOptions);
+        console.log('Is secure connection:', isSecureConnection);
         console.log(
             'Request headers available:',
             typeof globalThis !== 'undefined' ? 'yes' : 'no'
@@ -198,7 +200,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             path: '/',
             httpOnly: true,
             sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
-            secure: process.env.NODE_ENV === 'production', // Only secure in production, allows HTTP in dev
+            secure: false, // Don't use secure for HTTP connections
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
         console.log('Signup cookie set successfully');
