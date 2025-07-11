@@ -24,6 +24,7 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import { redirectToDashboard } from '@/lib/actions/redirect.actions';
+import { forceRedirectAfterAuth } from '@/lib/redirect-utils';
 import { toast } from 'sonner';
 import PlaygroundInfo from './PlaygroundInfo';
 
@@ -73,20 +74,10 @@ const AuthForm = ({ type }: { type: string }) => {
                         return;
                     } else {
                         toast.success('Account created successfully.');
-                        // Try server action first, then fallback to client-side redirect
-                        try {
-                            await redirectToDashboard();
-                        } catch (redirectError) {
-                            console.log(
-                                'Server redirect failed, using client redirect:',
-                                redirectError
-                            );
-                            if (typeof window !== 'undefined') {
-                                window.location.href = '/';
-                            } else {
-                                router.replace('/');
-                            }
-                        }
+                        console.log('Sign up successful, attempting redirect...');
+                        
+                        // Use robust redirect that checks for session
+                        forceRedirectAfterAuth();
                     }
                 } catch (signUpError) {
                     console.error('Sign up error:', signUpError);
@@ -103,20 +94,10 @@ const AuthForm = ({ type }: { type: string }) => {
 
                     if (response) {
                         toast.success('Successfully signed in.');
-                        // Try server action first, then fallback to client-side redirect
-                        try {
-                            await redirectToDashboard();
-                        } catch (redirectError) {
-                            console.log(
-                                'Server redirect failed, using client redirect:',
-                                redirectError
-                            );
-                            if (typeof window !== 'undefined') {
-                                window.location.href = '/';
-                            } else {
-                                router.replace('/');
-                            }
-                        }
+                        console.log('Sign in successful, attempting redirect...');
+                        
+                        // Use robust redirect that checks for session
+                        forceRedirectAfterAuth();
                     } else {
                         toast.error(
                             'Invalid email or password. Please try again.'
