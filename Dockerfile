@@ -59,7 +59,7 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=5004
+ENV PORT=5000
 
 # Create necessary directories with proper permissions
 RUN mkdir .next && \
@@ -77,11 +77,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 USER nextjs
 
 # Expose the port that the app runs on
-EXPOSE 5004
+EXPOSE 5000
 
 # Health check for container orchestration
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5004/api/health || exit 1
+    CMD curl -f http://localhost:5000/api/health || exit 1
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
