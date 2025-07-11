@@ -135,6 +135,22 @@ export default function ProductionDebug() {
         }
     };
 
+    const testDatabase = async () => {
+        try {
+            const response = await fetch('/api/debug-database');
+            const data = await response.json();
+            setResult(`Database Test:\n${JSON.stringify(data, null, 2)}`);
+            
+            if (data.success) {
+                setResult(prev => prev + '\n\n✅ Database connection successful!');
+            } else {
+                setResult(prev => prev + '\n\n❌ Database test failed. Check console logs.');
+            }
+        } catch (error) {
+            setResult(`Database Test Error: ${error}`);
+        }
+    };
+
     const runAllTests = async () => {
         setResult('Running all tests...\n\n');
         
@@ -234,24 +250,19 @@ export default function ProductionDebug() {
                     Try Client-Side Auth
                 </Button>
                 <Button
+                    onClick={testHttpFix}
+                    className='w-full text-xs bg-green-600 hover:bg-green-700'>
+                    � HTTP Fix Test
+                </Button>
+                <Button
+                    onClick={testDatabase}
+                    className='w-full text-xs bg-blue-600 hover:bg-blue-700'>
+                    �️ Test Database
+                </Button>
+                <Button
                     onClick={runAllTests}
                     className='w-full text-xs bg-red-600 hover:bg-red-700'>
                     🚨 Run All Tests
-                </Button>
-                <Button
-                    onClick={testHttpFix}
-                    className='w-full text-xs bg-green-600 hover:bg-green-700'>
-                    🔧 HTTP Fix Test
-                </Button>
-                <Button
-                    onClick={testClientSideAuth}
-                    className='w-full text-xs'>
-                    Test Client-Side Auth
-                </Button>
-                <Button
-                    onClick={runAllTests}
-                    className='w-full text-xs'>
-                    Run All Tests
                 </Button>
             </div>
 

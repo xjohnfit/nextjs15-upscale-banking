@@ -146,14 +146,22 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     let newUserAccount;
 
     try {
+        console.log('=== SIGNUP DEBUG START ===');
+        console.log('Signup attempt for email:', email);
+        console.log('Environment:', process.env.NODE_ENV);
+        
         const { account, database } = await createAdminClient();
+        console.log('Admin client created successfully');
 
+        // Create user account in Appwrite Auth
+        console.log('Creating user account in Appwrite Auth...');
         newUserAccount = await account.create(
             ID.unique(),
             email,
             password,
             `${firstName} ${lastName}`
         );
+        console.log('User account created successfully:', newUserAccount.$id);
 
         if (!newUserAccount) throw new Error('Error creating user');
 
@@ -162,6 +170,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         let dwollaCustomerId;
 
         try {
+            console.log('Creating Dwolla customer...');
             dwollaCustomerUrl = await createDwollaCustomer({
                 ...userData,
                 type: 'personal',
@@ -169,26 +178,54 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
             if (dwollaCustomerUrl) {
                 dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
+                console.log('Dwolla customer created successfully:', dwollaCustomerId);
             }
         } catch (dwollaError) {
             console.error('Dwolla customer creation failed:', dwollaError);
-            // Continue without Dwolla customer for now
-            dwollaCustomerUrl = null;
-            dwollaCustomerId = null;
+            // Set default values instead of null to satisfy Appwrite schema
+            dwollaCustomerUrl = 'pending';
+            dwollaCustomerId = 'pending';
         }
 
-        const newUser = await database.createDocument(
-            DATABASE_ID!,
-            USER_COLLECTION_ID!,
-            ID.unique(),
-            {
-                ...userData,
-                userId: newUserAccount.$id,
-                dwollaCustomerId: dwollaCustomerId || null,
-                dwollaCustomerUrl: dwollaCustomerUrl || null,
-            }
-        );
+        // Create user document in database
+        console.log('=== DATABASE CREATION DEBUG ===');
+        const userDocData = {
+            ...userData,
+            userId: newUserAccount.$id,
+            dwollaCustomerId: dwollaCustomerId || 'pending',
+            dwollaCustomerUrl: dwollaCustomerUrl || 'pending',
+        };
+        console.log('About to create user document with data:', userDocData);
+        console.log('Database ID:', DATABASE_ID);
+        console.log('User Collection ID:', USER_COLLECTION_ID);
 
+        let newUser;
+        try {
+            newUser = await database.createDocument(
+                DATABASE_ID!,
+                USER_COLLECTION_ID!,
+                ID.unique(),
+                userDocData
+            );
+            console.log('User document created successfully:', newUser.$id);
+        } catch (dbError: any) {
+            console.error('=== DATABASE CREATION ERROR ===');
+            console.error('Database creation error:', dbError);
+            console.error('Error details:', {
+                message: dbError?.message,
+                code: dbError?.code,
+                type: dbError?.type,
+                response: dbError?.response,
+            });
+            
+            // If user account was created but database document failed,
+            // we should clean up the auth account or handle this gracefully
+            console.log('Auth account was created but database document failed');
+            throw new Error(`Database document creation failed: ${dbError?.message || 'Unknown error'}`);
+        }
+
+        // Create session
+        console.log('Creating session...');
         const session = await account.createEmailPasswordSession(
             email,
             password
@@ -204,15 +241,23 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
         console.log('Signup cookie set successfully');
+        console.log('=== SIGNUP DEBUG END ===');
 
         return parseStringify(newUser);
     } catch (error: any) {
+        console.error('=== SIGNUP ERROR ===');
         console.error('Signup error details:', {
             message: error?.message,
             code: error?.code,
             type: error?.type,
             stack: error?.stack,
         });
+        
+        // If we created an auth account but failed later, log this
+        if (newUserAccount) {
+            console.error('Auth account was created but signup failed:', newUserAccount.$id);
+        }
+        
         return null;
     }
 };
