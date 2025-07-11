@@ -142,6 +142,25 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                             : 'Loading...'}
                     </p>
                 </Button>
+            ) : variant === 'mobile-nav' ? (
+                <div
+                    className='mobilenav-sheet_close w-full bg-bank-gradient cursor-pointer'
+                    onClick={handleClick}>
+                    <Image
+                        src='/icons/connect-bank.svg'
+                        alt='Connect Bank'
+                        width={20}
+                        height={20}
+                        className='brightness-[3] invert-0'
+                    />
+                    <p className='text-16 font-semibold text-white'>
+                        {loading
+                            ? 'Connecting...'
+                            : ready
+                            ? 'Connect Bank'
+                            : 'Loading...'}
+                    </p>
+                </div>
             ) : (
                 <Button
                     onClick={handleClick}

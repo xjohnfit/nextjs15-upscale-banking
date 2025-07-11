@@ -34,10 +34,10 @@ const MobileNav = ({ user }: MobileNavProps) => {
                 </SheetTrigger>
                 <SheetContent
                     side='left'
-                    className='border-none bg-white'>
+                    className='border-none bg-white flex flex-col h-full'>
                     <Link
                         href='/'
-                        className='cursor-pointer flex items-center gap-5 px-4'>
+                        className='cursor-pointer flex items-center gap-5 px-4 py-4 border-b border-gray-100'>
                         <Image
                             src='/icons/logo.svg'
                             width={34}
@@ -48,73 +48,72 @@ const MobileNav = ({ user }: MobileNavProps) => {
                             Upscale Banking
                         </h1>
                     </Link>
-                    <div className='mobilenav-sheet'>
-                        <div className='flex-1 overflow-y-auto'>
-                            <SheetClose asChild>
-                                <nav className='flex h-full flex-col gap-6 pt-16 text-white'>
-                                    {sidebarLinks.map((item) => {
-                                        const isActive =
-                                            pathname === item.route ||
-                                            pathname.startsWith(
-                                                `${item.route}/`
-                                            );
 
-                                        return (
-                                            <SheetClose
-                                                asChild
-                                                key={item.route}>
-                                                <Link
-                                                    href={item.route}
-                                                    key={item.label}
+                    {/* Scrollable content area */}
+                    <div className='flex-1 overflow-y-auto'>
+                        <SheetClose asChild>
+                            <nav className='flex flex-col gap-2 p-4'>
+                                {sidebarLinks.map((item) => {
+                                    const isActive =
+                                        pathname === item.route ||
+                                        pathname.startsWith(`${item.route}/`);
+
+                                    return (
+                                        <SheetClose
+                                            asChild
+                                            key={item.route}>
+                                            <Link
+                                                href={item.route}
+                                                key={item.label}
+                                                className={cn(
+                                                    'mobilenav-sheet_close w-full',
+                                                    {
+                                                        'bg-bank-gradient':
+                                                            isActive,
+                                                    }
+                                                )}>
+                                                <Image
+                                                    src={item.imgURL}
+                                                    alt={item.label}
+                                                    width={20}
+                                                    height={20}
+                                                    className={cn({
+                                                        'brightness-[3] invert-0':
+                                                            isActive,
+                                                    })}
+                                                />
+                                                <p
                                                     className={cn(
-                                                        'mobilenav-sheet_close w-full',
+                                                        'text-16 font-semibold text-black-2',
                                                         {
-                                                            'bg-bank-gradient':
+                                                            'text-white':
                                                                 isActive,
                                                         }
                                                     )}>
-                                                    <Image
-                                                        src={item.imgURL}
-                                                        alt={item.label}
-                                                        width={20}
-                                                        height={20}
-                                                        className={cn({
-                                                            'brightness-[3] invert-0':
-                                                                isActive,
-                                                        })}
-                                                    />
-                                                    <p
-                                                        className={cn(
-                                                            'text-16 font-semibold text-black-2',
-                                                            {
-                                                                'text-white':
-                                                                    isActive,
-                                                            }
-                                                        )}>
-                                                        {item.label}
-                                                    </p>
-                                                </Link>
-                                            </SheetClose>
-                                        );
-                                    })}
-                                </nav>
-                            </SheetClose>
+                                                    {item.label}
+                                                </p>
+                                            </Link>
+                                        </SheetClose>
+                                    );
+                                })}
+                            </nav>
+                        </SheetClose>
 
-                            <div className='px-4 py-4'>
-                                <PlaidLink
-                                    user={user}
-                                    variant='primary'
-                                    type='mobile'
-                                />
-                            </div>
-                        </div>
-
-                        <div className='mt-auto px-4 pb-4'>
-                            <Footer
+                        <div className='px-4 pb-4'>
+                            <PlaidLink
                                 user={user}
+                                variant='mobile-nav'
                                 type='mobile'
                             />
                         </div>
+                    </div>
+
+                    {/* Fixed footer at bottom */}
+                    <div className='border-t border-gray-100 p-4'>
+                        <Footer
+                            user={user}
+                            type='mobile'
+                        />
                     </div>
                 </SheetContent>
             </Sheet>
