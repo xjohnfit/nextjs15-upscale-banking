@@ -47,7 +47,8 @@ const Sidebar = ({ user }: SidebarProps) => {
                                             alt={item.label}
                                             fill
                                             className={cn({
-                                                'brightness-[3] invert-0': isActive,
+                                                'brightness-[3] invert-0':
+                                                    isActive,
                                             })}
                                         />
                                     </div>
@@ -61,7 +62,11 @@ const Sidebar = ({ user }: SidebarProps) => {
                             );
                         })}
 
-                        <PlaidLink user={user} type='desktop' variant='primary' />
+                        <PlaidLink
+                            user={user}
+                            type='desktop'
+                            variant='primary'
+                        />
                     </nav>
                 </div>
 
