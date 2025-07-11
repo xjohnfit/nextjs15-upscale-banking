@@ -17,14 +17,22 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
 
-    // Allow missing environment variables during build
+    // React 19 compatibility
     experimental: {
-        serverComponentsExternalPackages: ['@sentry/nextjs'],
+        ppr: false,
     },
 
-    webpack(config) {
+    // Webpack configuration
+    webpack: (config, { isServer, dev }) => {
         config.resolve.alias['@'] = path.resolve(__dirname);
         return config;
+    },
+
+    // Environment variables validation
+    env: {
+        NEXT_PUBLIC_APPWRITE_ENDPOINT:
+            process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+        NEXT_PUBLIC_APPWRITE_PROJECT: process.env.NEXT_PUBLIC_APPWRITE_PROJECT,
     },
 };
 

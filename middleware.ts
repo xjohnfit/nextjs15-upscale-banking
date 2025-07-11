@@ -1,6 +1,30 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Simple session validation function
+async function isValidSession(
+    sessionValue: string,
+    endpoint: string,
+    project: string
+): Promise<boolean> {
+    try {
+        // Create a minimal Appwrite client to test the session
+        const response = await fetch(`${endpoint}/account`, {
+            method: 'GET',
+            headers: {
+                'X-Appwrite-Project': project,
+                'X-Appwrite-Session': sessionValue,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.log('[MIDDLEWARE] Session validation failed:', error);
+        return false;
+    }
+}
+
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
@@ -55,12 +79,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // If user is authenticated and trying to access auth routes, redirect to dashboard
+    // If user has a session but is trying to access auth routes
+    // Let it pass - the auth route will handle the redirect if session is valid
     if (isAuthRoute && session) {
-        console.log('[MIDDLEWARE] Redirecting to dashboard (has session)');
-        const url = request.nextUrl.clone();
-        url.pathname = '/';
-        return NextResponse.redirect(url);
+        console.log(
+            '[MIDDLEWARE] Has session but accessing auth route - allowing (auth route will handle redirect)'
+        );
+        return NextResponse.next();
     }
 
     console.log('[MIDDLEWARE] Allowing request to proceed');

@@ -19,13 +19,36 @@ export async function createSessionClient() {
         throw new Error('No session');
     }
 
-    client.setSession(session.value);
+    try {
+        client.setSession(session.value);
 
-    return {
-        get account() {
-            return new Account(client);
-        },
-    };
+        // Test the session by creating an account instance and trying to verify it
+        const account = new Account(client);
+
+        return {
+            get account() {
+                return account;
+            },
+        };
+    } catch (error: any) {
+        console.error('Failed to create session client:', error);
+
+        // Clear invalid session cookie
+        try {
+            const cookieStore = await cookies();
+            cookieStore.delete('appwrite-session');
+            console.log(
+                'Cleared invalid session cookie from createSessionClient'
+            );
+        } catch (clearError) {
+            console.error(
+                'Failed to clear session cookie in createSessionClient:',
+                clearError
+            );
+        }
+
+        throw error;
+    }
 }
 
 export async function createAdminClient() {

@@ -13,20 +13,21 @@ export async function GET(request: NextRequest) {
             timestamp: new Date().toISOString(),
             environment: process.env.NODE_ENV,
             userAgent: request.headers.get('user-agent'),
+            authenticated: false,
+            user: null,
         };
 
         // Try to get user info if session exists
         if (session) {
             try {
                 const user = await getLoggedInUser();
-                authStatus.userAuthenticated = !!user;
+                authStatus.authenticated = !!user;
+                authStatus.user = user;
                 authStatus.userId = user?.$id || user?.userId;
             } catch (error: any) {
-                authStatus.userAuthenticated = false;
+                authStatus.authenticated = false;
                 authStatus.authError = error?.message || 'Unknown error';
             }
-        } else {
-            authStatus.userAuthenticated = false;
         }
 
         return NextResponse.json(authStatus, { status: 200 });

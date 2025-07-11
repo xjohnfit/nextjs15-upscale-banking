@@ -277,14 +277,60 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
 export async function getLoggedInUser() {
     try {
+        console.log('=== GET LOGGED IN USER DEBUG START ===');
+
+        // First check if we have a session cookie
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('appwrite-session');
+
+        console.log('Session cookie exists:', !!sessionCookie);
+        console.log(
+            'Session cookie value length:',
+            sessionCookie?.value?.length || 0
+        );
+
+        if (!sessionCookie || !sessionCookie.value) {
+            console.log('No session cookie found, user not logged in');
+            return null;
+        }
+
         const { account } = await createSessionClient();
+        console.log('Session client created successfully');
+
         const result = await account.get();
+        console.log('Account.get() successful, user ID:', result.$id);
 
         const user = await getUserInfo({ userId: result.$id });
+        console.log('User info retrieved successfully:', !!user);
 
+        console.log('=== GET LOGGED IN USER DEBUG END ===');
         return parseStringify(user);
-    } catch (error) {
-        console.log('Get logged in user error:', error);
+    } catch (error: any) {
+        console.error('=== GET LOGGED IN USER ERROR ===');
+        console.error('Get logged in user error:', error);
+        console.error('Error type:', error?.type);
+        console.error('Error code:', error?.code);
+
+        // Clear invalid session cookie for various Appwrite authentication errors
+        const shouldClearSession =
+            error &&
+            (error.message?.includes('session') ||
+                error.message?.includes('Invalid session') ||
+                error.message?.includes(
+                    'User (role: guests) missing scope (account)'
+                ) ||
+                error.message?.includes('Unauthorized') ||
+                error.type === 'user_unauthorized' ||
+                error.type === 'user_invalid_token' ||
+                error.type === 'general_unauthorized_scope' ||
+                error.code === 401);
+
+        if (shouldClearSession) {
+            console.log(
+                'Invalid session detected - session should be cleared by middleware or route handler'
+            );
+        }
+
         return null;
     }
 }
@@ -303,6 +349,8 @@ export const logoutAccount = async () => {
 
 export const createLinkToken = async (user: User) => {
     try {
+        console.log('Creating Plaid link token for user:', user.$id);
+
         const tokenParams = {
             user: {
                 client_user_id: user.$id,
@@ -313,11 +361,14 @@ export const createLinkToken = async (user: User) => {
             country_codes: ['US'] as CountryCode[],
         };
 
+        console.log('Plaid token params:', tokenParams);
         const response = await plaidClient.linkTokenCreate(tokenParams);
 
+        console.log('Plaid link token created successfully');
         return parseStringify({ linkToken: response.data.link_token });
     } catch (error) {
-        console.log(error);
+        console.error('Error creating Plaid link token:', error);
+        return null;
     }
 };
 
@@ -357,6 +408,8 @@ export const exchangePublicToken = async ({
     user,
 }: exchangePublicTokenProps) => {
     try {
+        console.log('Starting public token exchange for user:', user.$id);
+
         // Exchange public token for access token and item ID
         const response = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,
@@ -365,12 +418,15 @@ export const exchangePublicToken = async ({
         const accessToken = response.data.access_token;
         const itemId = response.data.item_id;
 
+        console.log('Token exchange successful, item ID:', itemId);
+
         // Get account information from Plaid using the access token
         const accountsResponse = await plaidClient.accountsGet({
             access_token: accessToken,
         });
 
         const accountData = accountsResponse.data.accounts[0];
+        console.log('Account data retrieved:', accountData.name);
 
         // Create a processor token for Dwolla using the access token and account ID
         const request: ProcessorTokenCreateRequest = {
@@ -383,6 +439,7 @@ export const exchangePublicToken = async ({
             request
         );
         const processorToken = processorTokenResponse.data.processor_token;
+        console.log('Processor token created successfully');
 
         // Create a funding source URL for the account using the Dwolla customer ID, processor token, and bank name
         const fundingSourceUrl = await addFundingSource({
@@ -392,7 +449,11 @@ export const exchangePublicToken = async ({
         });
 
         // If the funding source URL is not created, throw an error
-        if (!fundingSourceUrl) throw Error;
+        if (!fundingSourceUrl) {
+            throw new Error('Failed to create funding source URL');
+        }
+
+        console.log('Funding source created successfully');
 
         // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
         await createBankAccount({
@@ -404,6 +465,8 @@ export const exchangePublicToken = async ({
             shareableId: encryptId(accountData.account_id),
         });
 
+        console.log('Bank account created successfully');
+
         // Revalidate the path to reflect the changes
         revalidatePath('/');
 
@@ -413,9 +476,10 @@ export const exchangePublicToken = async ({
         });
     } catch (error) {
         console.error(
-            'An error occurred while creating exchanging token:',
+            'An error occurred while exchanging public token:',
             error
         );
+        throw error; // Re-throw so PlaidLink can handle it
     }
 };
 
@@ -439,15 +503,17 @@ export const getBank = async ({ documentId }: getBankProps) => {
     try {
         const { database } = await createAdminClient();
 
-        const bank = await database.listDocuments(
+        // Use getDocument directly for getting by document ID
+        const bank = await database.getDocument(
             DATABASE_ID!,
             BANK_COLLECTION_ID!,
-            [Query.equal('$id', [documentId])]
+            documentId
         );
 
-        return parseStringify(bank.documents[0]);
+        return parseStringify(bank);
     } catch (error) {
-        console.log(error);
+        console.log('Error getting bank:', error);
+        return null;
     }
 };
 
@@ -468,5 +534,23 @@ export const getBankByAccountId = async ({
         return parseStringify(bank.documents[0]);
     } catch (error) {
         console.log(error);
+    }
+};
+
+export const clearInvalidSession = async () => {
+    'use server';
+
+    try {
+        console.log('Clearing invalid session cookie...');
+        const cookieStore = await cookies();
+        cookieStore.delete('appwrite-session');
+        console.log('Invalid session cookie cleared successfully');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to clear invalid session cookie:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
     }
 };
