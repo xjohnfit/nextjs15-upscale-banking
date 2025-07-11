@@ -143,9 +143,14 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                     </p>
                 </Button>
             ) : variant === 'mobile-nav' ? (
-                <div
-                    className='mobilenav-sheet_close w-full bg-bank-gradient cursor-pointer'
-                    onClick={handleClick}>
+                <Button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleClick();
+                    }}
+                    disabled={isDisabled}
+                    className='mobilenav-sheet_close w-full !justify-start !bg-bank-gradient hover:!bg-bank-gradient cursor-pointer'>
                     <Image
                         src='/icons/connect-bank.svg'
                         alt='Connect Bank'
@@ -160,7 +165,7 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                             ? 'Connect Bank'
                             : 'Loading...'}
                     </p>
-                </div>
+                </Button>
             ) : (
                 <Button
                     onClick={handleClick}
