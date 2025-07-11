@@ -45,26 +45,73 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
 
 export const signIn = async ({ email, password }: signInProps) => {
     try {
+        console.log('=== SIGN IN DEBUG START ===');
         console.log('Sign in attempt for email:', email);
+        console.log('Environment:', process.env.NODE_ENV);
+        console.log(
+            'Appwrite endpoint:',
+            process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT
+        );
+        console.log(
+            'Appwrite project:',
+            process.env.NEXT_PUBLIC_APPWRITE_PROJECT
+        );
+
         const { account } = await createAdminClient();
+        console.log('Admin client created successfully');
+
         const session = await account.createEmailPasswordSession(
             email,
             password
         );
-        console.log('Session created successfully');
+        console.log('Session created successfully:', {
+            userId: session.userId,
+            sessionId: session.$id,
+            expire: session.expire,
+        });
 
-        const cookie = (await cookies()).set(
-            'appwrite-session',
-            session.secret,
-            {
+        const cookieStore = await cookies();
+        console.log('Cookie store obtained successfully');
+
+        // Try setting a test cookie first
+        try {
+            cookieStore.set('test-cookie', 'test-value', {
                 path: '/',
                 httpOnly: true,
-                sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
-                secure: process.env.NODE_ENV === 'production', // Only secure in production, allows HTTP in dev
-                maxAge: 60 * 60 * 24 * 30, // 30 days
-            }
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 60 * 60,
+            });
+            console.log('Test cookie set successfully');
+        } catch (testCookieError) {
+            console.error('Failed to set test cookie:', testCookieError);
+        }
+
+        // Now set the actual session cookie
+        const cookieOptions = {
+            path: '/',
+            httpOnly: true,
+            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            domain:
+                process.env.NODE_ENV === 'production' ? undefined : undefined, // Let browser decide
+        };
+        console.log('Cookie options:', cookieOptions);
+        console.log(
+            'Request headers available:',
+            typeof globalThis !== 'undefined' ? 'yes' : 'no'
         );
-        console.log('Cookie set successfully');
+
+        cookieStore.set('appwrite-session', session.secret, cookieOptions);
+        console.log(
+            'Session cookie set successfully with secret length:',
+            session.secret.length
+        );
+
+        // Verify cookie was set
+        const setCookie = cookieStore.get('appwrite-session');
+        console.log('Cookie verification:', setCookie ? 'found' : 'not found');
 
         // Try to get user info, but don't fail signin if it doesn't work
         let user;
@@ -80,10 +127,14 @@ export const signIn = async ({ email, password }: signInProps) => {
             user = { userId: session.userId, email };
         }
 
+        console.log('=== SIGN IN DEBUG END ===');
         return parseStringify(user);
-    } catch (error) {
+    } catch (error: any) {
+        console.error('=== SIGN IN ERROR ===');
         console.error('Sign in error:', error);
-        return null; // Return null instead of throwing to handle gracefully in frontend
+        console.error('Error message:', error?.message);
+        console.error('Error stack:', error?.stack);
+        return null;
     }
 };
 
@@ -140,18 +191,27 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             email,
             password
         );
+        console.log('Signup session created successfully:', session.$id);
 
-        (await cookies()).set('appwrite-session', session.secret, {
+        const cookieStore = await cookies();
+        cookieStore.set('appwrite-session', session.secret, {
             path: '/',
             httpOnly: true,
             sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
             secure: process.env.NODE_ENV === 'production', // Only secure in production, allows HTTP in dev
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
+        console.log('Signup cookie set successfully');
 
         return parseStringify(newUser);
-    } catch (error) {
-        console.error('Error', error);
+    } catch (error: any) {
+        console.error('Signup error details:', {
+            message: error?.message,
+            code: error?.code,
+            type: error?.type,
+            stack: error?.stack,
+        });
+        return null;
     }
 };
 

@@ -4,8 +4,24 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
+    // Skip middleware for API routes and static assets
+    if (
+        pathname.startsWith('/api/') ||
+        pathname.startsWith('/_next/') ||
+        pathname.startsWith('/icons/') ||
+        pathname === '/favicon.ico'
+    ) {
+        return NextResponse.next();
+    }
+
+    console.log('[MIDDLEWARE] Request for:', pathname);
+
     // Get the session cookie
     const session = request.cookies.get('appwrite-session');
+    console.log(
+        '[MIDDLEWARE] Session cookie:',
+        session ? 'present' : 'missing'
+    );
 
     // Define protected routes
     const protectedRoutes = [
@@ -24,8 +40,16 @@ export function middleware(request: NextRequest) {
     // Check if the current path is an auth route
     const isAuthRoute = authRoutes.includes(pathname);
 
+    console.log(
+        '[MIDDLEWARE] Protected route:',
+        isProtectedRoute,
+        'Auth route:',
+        isAuthRoute
+    );
+
     // If user is not authenticated and trying to access protected route
     if (isProtectedRoute && !session) {
+        console.log('[MIDDLEWARE] Redirecting to sign-in (no session)');
         const url = request.nextUrl.clone();
         url.pathname = '/sign-in';
         return NextResponse.redirect(url);
@@ -33,11 +57,13 @@ export function middleware(request: NextRequest) {
 
     // If user is authenticated and trying to access auth routes, redirect to dashboard
     if (isAuthRoute && session) {
+        console.log('[MIDDLEWARE] Redirecting to dashboard (has session)');
         const url = request.nextUrl.clone();
         url.pathname = '/';
         return NextResponse.redirect(url);
     }
 
+    console.log('[MIDDLEWARE] Allowing request to proceed');
     return NextResponse.next();
 }
 
