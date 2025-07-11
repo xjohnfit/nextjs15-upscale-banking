@@ -22,11 +22,9 @@ import CustomInput from './CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
-import { redirectToDashboard } from '@/lib/actions/redirect.actions';
+import { signIn, signUp } from '@/lib/actions/user.actions';
 import { forceRedirectAfterAuth } from '@/lib/redirect-utils';
 import { toast } from 'sonner';
-import PlaygroundInfo from './PlaygroundInfo';
 
 const AuthForm = ({ type }: { type: string }) => {
     const router = useRouter();
@@ -260,7 +258,6 @@ const AuthForm = ({ type }: { type: string }) => {
                     {type === 'sign-in' ? 'Sign up' : 'Sign in'}
                 </Link>
             </footer>
-            <PlaygroundInfo />
         </section>
     );
 };
