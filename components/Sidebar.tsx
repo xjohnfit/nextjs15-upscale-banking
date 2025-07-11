@@ -70,7 +70,7 @@ const Sidebar = ({ user }: SidebarProps) => {
                     </nav>
                 </div>
 
-                <div className='mt-auto'>
+                <div className='mt-auto p-4'>
                     <Footer user={user} />
                 </div>
             </div>

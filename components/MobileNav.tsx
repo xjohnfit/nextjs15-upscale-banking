@@ -109,7 +109,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                             </div>
                         </div>
 
-                        <div className='mt-auto'>
+                        <div className='mt-auto px-4 pb-4'>
                             <Footer
                                 user={user}
                                 type='mobile'
