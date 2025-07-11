@@ -4,7 +4,7 @@ import { signUp } from '@/lib/actions/user.actions';
 export async function POST(request: NextRequest) {
     try {
         console.log('=== AUTH FLOW TEST START ===');
-        
+
         const testUserData = {
             firstName: 'Test',
             lastName: 'User',
@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
             email: `test+${Date.now()}@example.com`,
             password: 'TestPassword123!',
         };
-        
+
         console.log('Creating test user with email:', testUserData.email);
-        
+
         const result = await signUp(testUserData);
-        
+
         if (result) {
             console.log('User created successfully:', result.$id);
             return NextResponse.json({
@@ -39,11 +39,10 @@ export async function POST(request: NextRequest) {
                 timestamp: new Date().toISOString(),
             });
         }
-        
     } catch (error: any) {
         console.error('=== AUTH FLOW TEST ERROR ===');
         console.error('Error:', error);
-        
+
         return NextResponse.json({
             success: false,
             error: error?.message || 'Unknown error',

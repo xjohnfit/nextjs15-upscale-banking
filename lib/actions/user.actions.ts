@@ -89,8 +89,9 @@ export const signIn = async ({ email, password }: signInProps) => {
 
         // Now set the actual session cookie
         // Fix: Don't use secure cookies on HTTP connections
-        const isSecureConnection = process.env.FORCE_SECURE_COOKIES === 'true' || false; // Force false for HTTP production
-        
+        const isSecureConnection =
+            process.env.FORCE_SECURE_COOKIES === 'true' || false; // Force false for HTTP production
+
         const cookieOptions = {
             path: '/',
             httpOnly: true,
@@ -149,7 +150,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         console.log('=== SIGNUP DEBUG START ===');
         console.log('Signup attempt for email:', email);
         console.log('Environment:', process.env.NODE_ENV);
-        
+
         const { account, database } = await createAdminClient();
         console.log('Admin client created successfully');
 
@@ -178,7 +179,10 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
             if (dwollaCustomerUrl) {
                 dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
-                console.log('Dwolla customer created successfully:', dwollaCustomerId);
+                console.log(
+                    'Dwolla customer created successfully:',
+                    dwollaCustomerId
+                );
             }
         } catch (dwollaError) {
             console.error('Dwolla customer creation failed:', dwollaError);
@@ -217,11 +221,17 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
                 type: dbError?.type,
                 response: dbError?.response,
             });
-            
+
             // If user account was created but database document failed,
             // we should clean up the auth account or handle this gracefully
-            console.log('Auth account was created but database document failed');
-            throw new Error(`Database document creation failed: ${dbError?.message || 'Unknown error'}`);
+            console.log(
+                'Auth account was created but database document failed'
+            );
+            throw new Error(
+                `Database document creation failed: ${
+                    dbError?.message || 'Unknown error'
+                }`
+            );
         }
 
         // Create session
@@ -252,12 +262,15 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             type: error?.type,
             stack: error?.stack,
         });
-        
+
         // If we created an auth account but failed later, log this
         if (newUserAccount) {
-            console.error('Auth account was created but signup failed:', newUserAccount.$id);
+            console.error(
+                'Auth account was created but signup failed:',
+                newUserAccount.$id
+            );
         }
-        
+
         return null;
     }
 };

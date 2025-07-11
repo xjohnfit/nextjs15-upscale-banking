@@ -54,11 +54,14 @@ export default function ProductionDebug() {
             const response = await fetch('/api/alt-auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, method })
+                body: JSON.stringify({ email, password, method }),
             });
             const data = await response.json();
-            setResult(`Alternative Auth (${method}):\n` + JSON.stringify(data, null, 2));
-            
+            setResult(
+                `Alternative Auth (${method}):\n` +
+                    JSON.stringify(data, null, 2)
+            );
+
             // If successful, try to reload the page to see if auth worked
             if (data.success) {
                 setTimeout(() => {
@@ -75,10 +78,12 @@ export default function ProductionDebug() {
             const response = await fetch('/api/aggressive-cookie-test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ testType: 'production-cookies' })
+                body: JSON.stringify({ testType: 'production-cookies' }),
             });
             const data = await response.json();
-            setResult('Aggressive Cookie Test:\n' + JSON.stringify(data, null, 2));
+            setResult(
+                'Aggressive Cookie Test:\n' + JSON.stringify(data, null, 2)
+            );
         } catch (error) {
             setResult('Aggressive Cookie Error: ' + error);
         }
@@ -89,25 +94,43 @@ export default function ProductionDebug() {
             const response = await fetch('/api/client-auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
-            
+
             if (data.success) {
                 // Try to set cookie via JavaScript (not ideal but may work)
                 try {
                     // Note: HttpOnly cookies can't be set via JavaScript, so we'll set a different one
-                    document.cookie = `client-session=${data.sessionSecret}; Path=/; SameSite=Lax; Max-Age=2592000${window.location.protocol === 'https:' ? '; Secure' : ''}`;
-                    setResult(`Client Auth Success:\n${JSON.stringify(data, null, 2)}\n\nCookie set via JavaScript. Reloading in 2 seconds...`);
-                    
+                    document.cookie = `client-session=${
+                        data.sessionSecret
+                    }; Path=/; SameSite=Lax; Max-Age=2592000${
+                        window.location.protocol === 'https:' ? '; Secure' : ''
+                    }`;
+                    setResult(
+                        `Client Auth Success:\n${JSON.stringify(
+                            data,
+                            null,
+                            2
+                        )}\n\nCookie set via JavaScript. Reloading in 2 seconds...`
+                    );
+
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 2000);
                 } catch (cookieError) {
-                    setResult(`Client Auth Success but cookie failed:\n${JSON.stringify(data, null, 2)}\n\nCookie Error: ${cookieError}`);
+                    setResult(
+                        `Client Auth Success but cookie failed:\n${JSON.stringify(
+                            data,
+                            null,
+                            2
+                        )}\n\nCookie Error: ${cookieError}`
+                    );
                 }
             } else {
-                setResult(`Client Auth Failed:\n${JSON.stringify(data, null, 2)}`);
+                setResult(
+                    `Client Auth Failed:\n${JSON.stringify(data, null, 2)}`
+                );
             }
         } catch (error) {
             setResult(`Client Auth Error: ${error}`);
@@ -119,13 +142,17 @@ export default function ProductionDebug() {
             const response = await fetch('/api/http-fix-auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
             setResult(`HTTP Fix Test:\n${JSON.stringify(data, null, 2)}`);
-            
+
             if (data.success) {
-                setResult(prev => prev + '\n\n✅ Authentication successful! Redirecting in 3 seconds...');
+                setResult(
+                    (prev) =>
+                        prev +
+                        '\n\n✅ Authentication successful! Redirecting in 3 seconds...'
+                );
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 3000);
@@ -140,11 +167,17 @@ export default function ProductionDebug() {
             const response = await fetch('/api/debug-database');
             const data = await response.json();
             setResult(`Database Test:\n${JSON.stringify(data, null, 2)}`);
-            
+
             if (data.success) {
-                setResult(prev => prev + '\n\n✅ Database connection successful!');
+                setResult(
+                    (prev) => prev + '\n\n✅ Database connection successful!'
+                );
             } else {
-                setResult(prev => prev + '\n\n❌ Database test failed. Check console logs.');
+                setResult(
+                    (prev) =>
+                        prev +
+                        '\n\n❌ Database test failed. Check console logs.'
+                );
             }
         } catch (error) {
             setResult(`Database Test Error: ${error}`);
@@ -153,43 +186,72 @@ export default function ProductionDebug() {
 
     const runAllTests = async () => {
         setResult('Running all tests...\n\n');
-        
+
         // Test 1: Environment
         try {
             const envResponse = await fetch('/api/debug-production');
             const envData = await envResponse.json();
-            setResult(prev => prev + '=== ENVIRONMENT ===\n' + JSON.stringify(envData, null, 2) + '\n\n');
+            setResult(
+                (prev) =>
+                    prev +
+                    '=== ENVIRONMENT ===\n' +
+                    JSON.stringify(envData, null, 2) +
+                    '\n\n'
+            );
         } catch (error) {
-            setResult(prev => prev + '=== ENVIRONMENT ERROR ===\n' + error + '\n\n');
+            setResult(
+                (prev) => prev + '=== ENVIRONMENT ERROR ===\n' + error + '\n\n'
+            );
         }
-        
+
         // Test 2: Cookie setting
         try {
             const cookieResponse = await fetch('/api/test-production-auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, testType: 'comprehensive' })
+                body: JSON.stringify({
+                    email,
+                    password,
+                    testType: 'comprehensive',
+                }),
             });
             const cookieData = await cookieResponse.json();
-            setResult(prev => prev + '=== COOKIE TEST ===\n' + JSON.stringify(cookieData, null, 2) + '\n\n');
+            setResult(
+                (prev) =>
+                    prev +
+                    '=== COOKIE TEST ===\n' +
+                    JSON.stringify(cookieData, null, 2) +
+                    '\n\n'
+            );
         } catch (error) {
-            setResult(prev => prev + '=== COOKIE TEST ERROR ===\n' + error + '\n\n');
+            setResult(
+                (prev) => prev + '=== COOKIE TEST ERROR ===\n' + error + '\n\n'
+            );
         }
-        
+
         // Test 3: Alternative auth
         try {
             const altResponse = await fetch('/api/alt-auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, method: 'headers' })
+                body: JSON.stringify({ email, password, method: 'headers' }),
             });
             const altData = await altResponse.json();
-            setResult(prev => prev + '=== ALTERNATIVE AUTH ===\n' + JSON.stringify(altData, null, 2) + '\n\n');
+            setResult(
+                (prev) =>
+                    prev +
+                    '=== ALTERNATIVE AUTH ===\n' +
+                    JSON.stringify(altData, null, 2) +
+                    '\n\n'
+            );
         } catch (error) {
-            setResult(prev => prev + '=== ALTERNATIVE AUTH ERROR ===\n' + error + '\n\n');
+            setResult(
+                (prev) =>
+                    prev + '=== ALTERNATIVE AUTH ERROR ===\n' + error + '\n\n'
+            );
         }
-        
-        setResult(prev => prev + '=== ALL TESTS COMPLETE ===');
+
+        setResult((prev) => prev + '=== ALL TESTS COMPLETE ===');
     };
 
     return (

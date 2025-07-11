@@ -41,12 +41,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             testCookie: testCookie ? testCookie.value : 'not found',
             sessionCookie: sessionCookie ? 'present' : 'not found',
-            allCookies: cookieStore
-                .getAll()
-                .map((c) => ({
-                    name: c.name,
-                    value: c.value ? 'present' : 'empty',
-                })),
+            allCookies: cookieStore.getAll().map((c) => ({
+                name: c.name,
+                value: c.value ? 'present' : 'empty',
+            })),
             environment: process.env.NODE_ENV,
             timestamp: new Date().toISOString(),
         });

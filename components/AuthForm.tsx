@@ -74,8 +74,10 @@ const AuthForm = ({ type }: { type: string }) => {
                         return;
                     } else {
                         toast.success('Account created successfully.');
-                        console.log('Sign up successful, attempting redirect...');
-                        
+                        console.log(
+                            'Sign up successful, attempting redirect...'
+                        );
+
                         // Use robust redirect that checks for session
                         forceRedirectAfterAuth();
                     }
@@ -94,8 +96,10 @@ const AuthForm = ({ type }: { type: string }) => {
 
                     if (response) {
                         toast.success('Successfully signed in.');
-                        console.log('Sign in successful, attempting redirect...');
-                        
+                        console.log(
+                            'Sign in successful, attempting redirect...'
+                        );
+
                         // Use robust redirect that checks for session
                         forceRedirectAfterAuth();
                     } else {
