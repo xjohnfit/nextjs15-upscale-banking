@@ -10,7 +10,7 @@ import { getLoggedInUser } from '@/lib/actions/user.actions';
 const Home = async (props: SearchParamProps) => {
     const searchParams = props.searchParams;
 
-    const { id, page } = searchParams;
+    const { id, page } = await searchParams;
 
     const currentPage = Number(page as string) || 1;
 
