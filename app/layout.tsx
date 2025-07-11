@@ -5,6 +5,7 @@ import { Inter, IBM_Plex_Serif } from 'next/font/google';
 import './globals.css';
 
 import { Toaster } from '@/components/ui/sonner';
+import AuthDebug from '@/components/AuthDebug';
 import '@/lib/env-validation'; // Runtime environment validation
 
 import * as Sentry from '@sentry/nextjs';
@@ -32,11 +33,14 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const isProduction = process.env.NODE_ENV === 'production';
+
     return (
         <html lang='en'>
             <body className={`${inter.variable} ${ibmPlexSerif.variable}`}>
                 {children}
                 <Toaster position='bottom-center' />
+                <AuthDebug isProduction={isProduction} />
             </body>
         </html>
     );

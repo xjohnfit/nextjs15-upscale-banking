@@ -23,6 +23,7 @@ import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
+import { redirectToDashboard } from '@/lib/actions/redirect.actions';
 import { toast } from 'sonner';
 import PlaygroundInfo from './PlaygroundInfo';
 
@@ -49,59 +50,81 @@ const AuthForm = ({ type }: { type: string }) => {
             // Sign up with Appwrite & create plaid token
 
             if (type === 'sign-up') {
-                const userData = {
-                    firstName: data.firstName!,
-                    lastName: data.lastName!,
-                    address1: data.address1!,
-                    city: data.city!,
-                    state: data.state!,
-                    postalCode: data.postalCode!,
-                    dateOfBirth: data.dateOfBirth!,
-                    ssn: data.ssn!,
-                    email: data.email,
-                    password: data.password,
-                };
+                try {
+                    const userData = {
+                        firstName: data.firstName!,
+                        lastName: data.lastName!,
+                        address1: data.address1!,
+                        city: data.city!,
+                        state: data.state!,
+                        postalCode: data.postalCode!,
+                        dateOfBirth: data.dateOfBirth!,
+                        ssn: data.ssn!,
+                        email: data.email,
+                        password: data.password,
+                    };
 
-                const newUser = await signUp(userData);
+                    const newUser = await signUp(userData);
 
-                if (!newUser) {
-                    toast.error('Failed to create account. Please try again.');
-                    return;
-                } else {
-                    toast.success('Account created successfully.');
-                    // Small delay to ensure session is set before redirect
-                    setTimeout(() => {
-                        router.replace('/');
-                        // Fallback using window.location if router doesn't work
-                        setTimeout(() => {
+                    if (!newUser) {
+                        toast.error(
+                            'Failed to create account. Please try again.'
+                        );
+                        return;
+                    } else {
+                        toast.success('Account created successfully.');
+                        // Try server action first, then fallback to client-side redirect
+                        try {
+                            await redirectToDashboard();
+                        } catch (redirectError) {
+                            console.log(
+                                'Server redirect failed, using client redirect:',
+                                redirectError
+                            );
                             if (typeof window !== 'undefined') {
                                 window.location.href = '/';
+                            } else {
+                                router.replace('/');
                             }
-                        }, 1000);
-                    }, 500);
+                        }
+                    }
+                } catch (signUpError) {
+                    console.error('Sign up error:', signUpError);
+                    toast.error('Failed to create account. Please try again.');
                 }
             }
 
             if (type === 'sign-in') {
-                const response = await signIn({
-                    email: data.email,
-                    password: data.password,
-                });
+                try {
+                    const response = await signIn({
+                        email: data.email,
+                        password: data.password,
+                    });
 
-                if (response) {
-                    toast.success('Successfully signed in.');
-                    // Small delay to ensure session is set before redirect
-                    setTimeout(() => {
-                        router.replace('/');
-                        // Fallback using window.location if router doesn't work
-                        setTimeout(() => {
+                    if (response) {
+                        toast.success('Successfully signed in.');
+                        // Try server action first, then fallback to client-side redirect
+                        try {
+                            await redirectToDashboard();
+                        } catch (redirectError) {
+                            console.log(
+                                'Server redirect failed, using client redirect:',
+                                redirectError
+                            );
                             if (typeof window !== 'undefined') {
                                 window.location.href = '/';
+                            } else {
+                                router.replace('/');
                             }
-                        }, 1000);
-                    }, 500);
-                } else {
-                    toast.error('Invalid email or password. Please try again.');
+                        }
+                    } else {
+                        toast.error(
+                            'Invalid email or password. Please try again.'
+                        );
+                    }
+                } catch (signInError) {
+                    console.error('Sign in error:', signInError);
+                    toast.error('Sign in failed. Please try again.');
                 }
             }
         } catch (error) {

@@ -45,11 +45,13 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
 
 export const signIn = async ({ email, password }: signInProps) => {
     try {
+        console.log('Sign in attempt for email:', email);
         const { account } = await createAdminClient();
         const session = await account.createEmailPasswordSession(
             email,
             password
         );
+        console.log('Session created successfully');
 
         const cookie = (await cookies()).set(
             'appwrite-session',
@@ -57,15 +59,18 @@ export const signIn = async ({ email, password }: signInProps) => {
             {
                 path: '/',
                 httpOnly: true,
-                sameSite: 'strict',
-                secure: true,
+                sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
+                secure: process.env.NODE_ENV === 'production', // Only secure in production, allows HTTP in dev
+                maxAge: 60 * 60 * 24 * 30, // 30 days
             }
         );
+        console.log('Cookie set successfully');
 
         // Try to get user info, but don't fail signin if it doesn't work
         let user;
         try {
             user = await getUserInfo({ userId: session.userId });
+            console.log('User info retrieved successfully');
         } catch (userInfoError) {
             console.log(
                 'Could not fetch user info, but signin was successful:',
@@ -139,8 +144,9 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         (await cookies()).set('appwrite-session', session.secret, {
             path: '/',
             httpOnly: true,
-            sameSite: 'strict',
-            secure: true,
+            sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
+            secure: process.env.NODE_ENV === 'production', // Only secure in production, allows HTTP in dev
+            maxAge: 60 * 60 * 24 * 30, // 30 days
         });
 
         return parseStringify(newUser);
