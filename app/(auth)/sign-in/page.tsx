@@ -7,12 +7,12 @@ const SignIn = () => {
         <section className='flex-center size-full max-sm:px-6'>
             <AuthForm type='sign-in' />
             {process.env.NODE_ENV === 'development' && (
-                <div className='fixed top-4 right-4'>
+                <div className='fixed top-4 left-4'>
                     <CookieTest />
                 </div>
             )}
-            {/* Production debug - always available but small */}
-            <div className='fixed bottom-4 left-4 z-50'>
+            {/* Production debug - moved to far right to avoid form overlap */}
+            <div className='fixed top-4 right-4 z-50 max-w-xs'>
                 <ProductionDebug />
             </div>
         </section>
