@@ -7,6 +7,9 @@ This directory contains Nginx configuration and setup scripts for deploying your
 - `upscale-banking.conf` - Main Nginx configuration file
 - `setup-nginx.sh` - Initial Nginx installation and configuration script
 - `setup-ssl.sh` - SSL certificate setup script (Let's Encrypt)
+- `update-domain.sh` - Quick script to update domain in Nginx config
+- `k8s-debug.sh` - Kubernetes troubleshooting and diagnostic script
+- `fix-k8s-ports.sh` - Fix common Kubernetes port configuration issues
 - `diagnose.sh` - DNS and connectivity diagnostic script
 - `monitor.sh` - Service monitoring and status checking script
 
@@ -32,7 +35,13 @@ sudo ./setup-nginx.sh
 ```
 
 ### Step 4: Update Domain Configuration
-Replace `yourdomain.com` with your actual domain in the Nginx config:
+**Option A - Quick Update (Recommended):**
+```bash
+chmod +x update-domain.sh
+sudo ./update-domain.sh
+```
+
+**Option B - Manual Update:**
 ```bash
 sudo nano /etc/nginx/sites-available/upscale-banking
 # Replace all instances of 'yourdomain.com' with your domain
@@ -109,6 +118,59 @@ This shows:
 - System resources
 
 ## 🔍 Troubleshooting
+
+### Getting 404 Error (Nginx Working but App Not Found)
+If you get HTTP 404 and the diagnostic shows "App not responding on port 30000":
+
+**This means your Kubernetes app is not running or not accessible.**
+
+1. **Check if Kubernetes pods are running:**
+   ```bash
+   kubectl get pods
+   kubectl get services
+   kubectl get deployments
+   ```
+
+2. **If no pods are running, deploy your app:**
+   ```bash
+   # Apply your Kubernetes deployment
+   kubectl apply -f kubernetes/deployment.yml
+   kubectl apply -f kubernetes/service.yml
+   
+   # Check the status
+   kubectl get pods -w
+   ```
+
+3. **Check service is exposing port 30000:**
+   ```bash
+   kubectl get services
+   # Should show a service with port 30000
+   ```
+
+4. **Test app directly on the server:**
+   ```bash
+   curl http://localhost:30000
+   # This should return your app, not an error
+   ```
+
+5. **Check pod logs if app is failing:**
+   ```bash
+   kubectl logs <pod-name>
+   kubectl describe pod <pod-name>
+   ```
+
+6. **Common fixes:**
+   ```bash
+   # Restart deployment
+   kubectl rollout restart deployment/upscale-banking
+   
+   # Delete and recreate pods
+   kubectl delete pods --all
+   
+   # Check node resources
+   kubectl top nodes
+   kubectl top pods
+   ```
 
 ### Domain Not Resolving (curl: Could not resolve host)
 This means DNS is not set up correctly. Check these steps:

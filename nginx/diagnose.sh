@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-DOMAIN="upscalebanking.com"
+DOMAIN="upscalebanking.codewithxjohn.com"
 SERVER_IP="46.202.89.158"
 APP_PORT="30000"
 
