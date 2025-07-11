@@ -8,7 +8,7 @@ import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 
 const Home = async (props: SearchParamProps) => {
-    const searchParams = await props.searchParams;
+    const searchParams = props.searchParams;
 
     const { id, page } = searchParams;
 
@@ -121,16 +121,7 @@ const Home = async (props: SearchParamProps) => {
         const appwriteItemId =
             (id as string) || accountsData[0]?.appwriteItemId;
 
-        console.log('Home page debug:');
-        console.log('- accountsData length:', accountsData?.length);
-        console.log(
-            '- first account appwriteItemId:',
-            accountsData[0]?.appwriteItemId
-        );
-        console.log('- selected appwriteItemId:', appwriteItemId);
-
         if (!appwriteItemId) {
-            console.log('No appwriteItemId available, skipping account fetch');
             // Return home page without account data, but include PlaidLink for connecting
             return (
                 <section className='home'>
