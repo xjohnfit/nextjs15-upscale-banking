@@ -69,6 +69,7 @@ RUN mkdir .next && \
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/app ./app
 
 # Copy package.json for runtime
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
