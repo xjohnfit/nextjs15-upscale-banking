@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,14 +22,38 @@ import CustomInput from './CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn, signUp } from '@/lib/actions/user.actions';
-import { forceRedirectAfterAuth } from '@/lib/redirect-utils';
+import {
+    signIn,
+    signUp,
+    clearInvalidSession,
+} from '@/lib/actions/user.actions';
+import {
+    forceRedirectAfterAuth,
+    simpleRedirectAfterAuth,
+} from '@/lib/redirect-utils';
 import { toast } from 'sonner';
 import PlaygroundInfo from './PlaygroundInfo';
 
 const AuthForm = ({ type }: { type: string }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+
+    // Clear any invalid session on component mount
+    useEffect(() => {
+        const clearSession = async () => {
+            try {
+                await clearInvalidSession();
+                console.log('Any existing invalid session cleared');
+            } catch (error) {
+                console.log(
+                    'No session to clear or error clearing session:',
+                    error
+                );
+            }
+        };
+
+        clearSession();
+    }, []);
 
     const formSchema = authFormSchema(type);
 
@@ -72,13 +96,22 @@ const AuthForm = ({ type }: { type: string }) => {
                         );
                         return;
                     } else {
-                        toast.success('Account created successfully.');
+                        toast.success(
+                            'Account created successfully! Redirecting to dashboard...'
+                        );
                         console.log(
                             'Sign up successful, attempting redirect...'
                         );
 
-                        // Use robust redirect that checks for session
-                        forceRedirectAfterAuth();
+                        // Try the robust redirect first, with simple fallback
+                        try {
+                            await forceRedirectAfterAuth();
+                        } catch (redirectError) {
+                            console.log(
+                                'Robust redirect failed, using simple redirect...'
+                            );
+                            simpleRedirectAfterAuth();
+                        }
                     }
                 } catch (signUpError) {
                     console.error('Sign up error:', signUpError);
@@ -94,13 +127,22 @@ const AuthForm = ({ type }: { type: string }) => {
                     });
 
                     if (response) {
-                        toast.success('Successfully signed in.');
+                        toast.success(
+                            'Successfully signed in! Redirecting to dashboard...'
+                        );
                         console.log(
                             'Sign in successful, attempting redirect...'
                         );
 
-                        // Use robust redirect that checks for session
-                        forceRedirectAfterAuth();
+                        // Try the robust redirect first, with simple fallback
+                        try {
+                            await forceRedirectAfterAuth();
+                        } catch (redirectError) {
+                            console.log(
+                                'Robust redirect failed, using simple redirect...'
+                            );
+                            simpleRedirectAfterAuth();
+                        }
                     } else {
                         toast.error(
                             'Invalid email or password. Please try again.'

@@ -17,9 +17,11 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
 
-    // Allow missing environment variables during build
-    experimental: {
-        serverComponentsExternalPackages: ['@sentry/nextjs'],
+    // Environment variables validation
+    env: {
+        NEXT_PUBLIC_APPWRITE_ENDPOINT:
+            process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+        NEXT_PUBLIC_APPWRITE_PROJECT: process.env.NEXT_PUBLIC_APPWRITE_PROJECT,
     },
 
     webpack(config) {

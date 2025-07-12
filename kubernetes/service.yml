@@ -6,8 +6,8 @@ metadata:
     app: upscale-banking
 spec:
   ports:
-  - port: 3000
-    targetPort: 5004
+  - port: 5000
+    targetPort: 5000
     nodePort: 30000
   selector:
     app: upscale-banking
