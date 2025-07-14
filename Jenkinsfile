@@ -86,20 +86,25 @@ pipeline {
         stage("11. Update Kubernetes Deployment for ArgoCD") {
             steps {
                 script {
-                    sh """
-                    git config --global user.name "John Rocha"
-                    git config --global user.email "xjohnfitcodes@gmail.com"
+                    withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                        sh """
+                        git config --global user.name "John Rocha"
+                        git config --global user.email "xjohnfitcodes@gmail.com"
 
-                    # Update image tag in deployment YAML
-                    sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yml
+                        # Update image tag in deployment YAML
+                        sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yml
 
-                    git add kubernetes/deployment.yml
-                    git commit -m "Update deployment image to ${IMAGE_TAG} via Jenkins"
-                    git push origin main
-                    """
+                        git add kubernetes/deployment.yml
+                        git commit -m "Update deployment image to ${IMAGE_TAG} via Jenkins"
+
+                        # Push using token-based authentication
+                        git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/xjohnfit/nextjs15-upscale-banking.git
+                        git push origin main
+                        """
+                    }
                 }
             }
-        }
+        }   
     }
     post {
       always {
