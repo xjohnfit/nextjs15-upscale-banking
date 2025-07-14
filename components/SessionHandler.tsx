@@ -38,7 +38,6 @@ export default function SessionHandler({
             // Force page reload to clear any cached state
             window.location.href = '/sign-in';
         } catch (error) {
-            console.error('Error clearing session:', error);
             // Force redirect anyway
             window.location.href = '/sign-in';
         }

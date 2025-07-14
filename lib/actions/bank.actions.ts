@@ -63,7 +63,7 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
             totalCurrentBalance,
         });
     } catch (error) {
-        console.error('An error occurred while getting the accounts:', error);
+        return null;
     }
 };
 
@@ -74,15 +74,10 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
         const bank = await getBank({ documentId: appwriteItemId });
 
         if (!bank) {
-            console.error('Bank not found for appwriteItemId:', appwriteItemId);
             return null;
         }
 
         if (!bank.accessToken) {
-            console.error(
-                'Bank found but no access token available for bank:',
-                bank.$id
-            );
             return null;
         }
 
@@ -142,7 +137,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
             transactions: allTransactions,
         });
     } catch (error) {
-        console.error('An error occurred while getting the account:', error);
+        return null;
     }
 };
 
@@ -160,7 +155,7 @@ export const getInstitution = async ({
 
         return parseStringify(institution);
     } catch (error) {
-        console.error('An error occurred while getting the accounts:', error);
+        return null;
     }
 };
 
@@ -200,6 +195,6 @@ export const getTransactions = async ({
 
         return parseStringify(transactions);
     } catch (error) {
-        console.error('An error occurred while getting the accounts:', error);
+        return [];
     }
 };

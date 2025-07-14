@@ -103,7 +103,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                             <PlaidLink
                                 user={user}
                                 variant='mobile-nav'
-                                type='mobile'
+                                type='default'
                             />
                         </div>
                     </div>

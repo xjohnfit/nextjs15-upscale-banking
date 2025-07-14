@@ -26,8 +26,8 @@ export function validateEnvVars() {
     );
 
     if (missingVars.length > 0) {
-        console.error('Missing required environment variables:', missingVars);
-        // Don't throw error, just log - let the app handle it gracefully
+        // Missing environment variables detected
+        // Let the app handle it gracefully
     }
 }
 

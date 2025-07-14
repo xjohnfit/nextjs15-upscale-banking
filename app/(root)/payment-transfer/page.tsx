@@ -49,7 +49,6 @@ const Transfer = async () => {
             </section>
         );
     } catch (error) {
-        console.error('Error loading payment transfer page:', error);
         return (
             <section className='payment-transfer'>
                 <HeaderBox

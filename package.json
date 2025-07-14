@@ -8,8 +8,7 @@
     "build:production": "bash scripts/build.sh",
     "build:windows": "scripts\\build.bat",
     "start": "next start -p 5000",
-    "lint": "next lint",
-    "check-env": "node scripts/check-env.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

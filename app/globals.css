@@ -269,6 +269,13 @@
         @apply flex !justify-start cursor-pointer gap-3 rounded-lg !bg-transparent flex-row;
     }
 
+    /* Mobile PlaidLink specific styles */
+    .plaidlink-mobile {
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        user-select: none !important;
+    }
+
     /* Auth */
     .auth-asset {
         @apply flex h-screen w-full sticky top-0 items-center justify-end bg-sky-1 max-lg:hidden;
@@ -374,5 +381,17 @@
 
     .sidebar-label {
         @apply text-16 font-semibold text-black-2 max-xl:hidden;
+    }
+
+    /* Essential mobile touch support for Plaid - minimal approach */
+    @media (max-width: 768px) {
+        /* Ensure Plaid elements are touchable on mobile without forcing popup behavior */
+        div[id*='plaid-link-'] button,
+        div[id*='plaid-link-'] input,
+        div[id*='plaid-link-'] a,
+        iframe[src*='plaid'] {
+            touch-action: manipulation !important;
+            pointer-events: auto !important;
+        }
     }
 }

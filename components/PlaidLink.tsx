@@ -26,17 +26,13 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
     useEffect(() => {
         const getLinkToken = async () => {
             try {
-                console.log('Creating Plaid link token for user:', user.$id);
                 const data = await createLinkToken(user);
 
                 if (data?.linkToken) {
                     setToken(data.linkToken);
-                    console.log('Plaid link token created successfully');
-                } else {
-                    console.error('Failed to create Plaid link token');
                 }
             } catch (error) {
-                console.error('Error creating Plaid link token:', error);
+                // Failed to create link token
             }
         };
 
@@ -49,36 +45,47 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
         async (public_token: string, metadata) => {
             try {
                 setLoading(true);
-                console.log('Plaid Link success:', { public_token, metadata });
 
                 await exchangePublicToken({
                     publicToken: public_token,
                     user,
                 });
 
-                console.log('Bank account linked successfully');
-                // Redirect to dashboard after successful bank linking
-                router.push('/');
+                // Use window.location for more reliable redirect instead of router.push
+                window.location.href = '/';
             } catch (error) {
-                console.error('Error linking bank account:', error);
                 // Still redirect to dashboard even if there's an error
-                router.push('/');
+                window.location.href = '/';
             } finally {
                 setLoading(false);
             }
         },
-        [user, router]
+        [user]
     );
 
     const onExit = useCallback<PlaidLinkOnExit>((err, metadata) => {
-        console.log('Plaid Link exit:', { err, metadata });
+        // Handle Plaid Link exit - log any errors for debugging
         if (err != null) {
-            console.error('Plaid Link error:', err);
+            console.log('Plaid Link exit error:', err);
         }
     }, []);
 
     const onEvent = useCallback<PlaidLinkOnEvent>((eventName, metadata) => {
-        console.log('Plaid Link event:', { eventName, metadata });
+        // Handle Plaid Link events
+        console.log('Plaid Event:', eventName, metadata);
+
+        if (eventName === 'HANDOFF') {
+            console.log(
+                '🚨 OAuth Bank Selected - This will open a popup window'
+            );
+            console.log(
+                '💡 To avoid popups, try selecting these banks instead:'
+            );
+            console.log('   • First Platypus Bank');
+            console.log('   • Tattersall Federal Credit Union');
+            console.log('   • Houndstooth Bank');
+            console.log('   • The Royal Bank of Plaid');
+        }
     }, []);
 
     const config: PlaidLinkOptions = {
@@ -87,24 +94,44 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
         onExit,
         onEvent,
         env: (process.env.PLAID_ENV as any) || 'sandbox',
-        // Additional configuration for better stability
+        // Explicitly set to undefined to prevent OAuth redirects and keep within modal
         receivedRedirectUri: undefined,
     };
 
     const { open, ready, error } = usePlaidLink(config);
 
     const handleClick = () => {
+        console.log('PlaidLink button clicked', {
+            ready,
+            loading,
+            token: !!token,
+        });
+
+        // Validate token and ready state before attempting to open Plaid
+        if (!token) {
+            console.error('Plaid token not available');
+            return;
+        }
+
         if (ready && !loading) {
-            console.log('Opening Plaid Link...');
+            console.log('Opening Plaid Link');
             open();
         } else {
-            console.log('Plaid Link not ready or currently loading');
+            console.log('Plaid not ready or loading', { ready, loading });
         }
     };
 
     // Show error state if there's an issue with Plaid Link
     if (error) {
         console.error('Plaid Link error:', error);
+        // Return a disabled button if there's an error
+        return (
+            <Button
+                disabled
+                className={variant === 'ghost' ? 'bg-white' : ''}>
+                Link Unavailable
+            </Button>
+        );
     }
 
     const isDisabled = !ready || loading || !token;
@@ -115,7 +142,8 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                 <Button
                     onClick={handleClick}
                     disabled={isDisabled}
-                    className='plaidlink-primary'>
+                    className='plaidlink-primary'
+                    style={{ touchAction: 'manipulation' }}>
                     {loading
                         ? 'Connecting...'
                         : ready
@@ -144,11 +172,7 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                 </Button>
             ) : variant === 'mobile-nav' ? (
                 <Button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleClick();
-                    }}
+                    onClick={handleClick}
                     disabled={isDisabled}
                     className='mobilenav-sheet_close w-full !justify-start !bg-bank-gradient hover:!bg-bank-gradient cursor-pointer'>
                     <Image

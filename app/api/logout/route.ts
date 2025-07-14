@@ -16,14 +16,12 @@ export async function POST(request: NextRequest) {
             { status: 200 }
         );
     } catch (error: any) {
-        console.error('Logout error:', error);
-
         // Even if logout fails, clear the cookie
         try {
             const cookieStore = await cookies();
             cookieStore.delete('appwrite-session');
         } catch (cookieError) {
-            console.error('Failed to clear cookie during logout:', cookieError);
+            // Failed to clear cookie
         }
 
         return NextResponse.json(

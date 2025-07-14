@@ -124,7 +124,6 @@ const TransactionHistory = async (props: SearchParamProps) => {
             </div>
         );
     } catch (error) {
-        console.error('Error loading transaction history page:', error);
         return (
             <div className='transactions'>
                 <div className='transactions-header'>

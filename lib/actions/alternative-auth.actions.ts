@@ -12,8 +12,6 @@ export async function signInWithHeaders({
     password: string;
 }) {
     try {
-        console.log('[HEADER-AUTH] Starting sign-in for:', email);
-
         // Import Appwrite and create session
         const { createAdminClient } = await import('@/lib/appwrite');
         const { account } = await createAdminClient();
@@ -22,7 +20,6 @@ export async function signInWithHeaders({
             email,
             password
         );
-        console.log('[HEADER-AUTH] Session created:', session.$id);
 
         // Instead of using cookies(), we'll return the session to set it on client
         return {
@@ -32,7 +29,6 @@ export async function signInWithHeaders({
             sessionId: session.$id,
         };
     } catch (error: any) {
-        console.error('[HEADER-AUTH] Error:', error);
         return {
             success: false,
             error: error?.message || 'Authentication failed',
@@ -49,8 +45,6 @@ export async function signInWithResponse({
     password: string;
 }) {
     try {
-        console.log('[RESPONSE-AUTH] Starting sign-in for:', email);
-
         const { createAdminClient } = await import('@/lib/appwrite');
         const { account } = await createAdminClient();
 
@@ -58,7 +52,6 @@ export async function signInWithResponse({
             email,
             password
         );
-        console.log('[RESPONSE-AUTH] Session created:', session.$id);
 
         // Create a response that sets the cookie
         const response = NextResponse.json({
@@ -81,10 +74,8 @@ export async function signInWithResponse({
         }; ${cookieFlags.join('; ')}`;
         response.headers.set('Set-Cookie', cookieValue);
 
-        console.log('[RESPONSE-AUTH] Cookie set via headers:', cookieValue);
         return response;
     } catch (error: any) {
-        console.error('[RESPONSE-AUTH] Error:', error);
         return NextResponse.json(
             {
                 success: false,

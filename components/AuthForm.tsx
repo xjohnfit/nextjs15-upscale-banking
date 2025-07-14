@@ -43,12 +43,8 @@ const AuthForm = ({ type }: { type: string }) => {
         const clearSession = async () => {
             try {
                 await clearInvalidSession();
-                console.log('Any existing invalid session cleared');
             } catch (error) {
-                console.log(
-                    'No session to clear or error clearing session:',
-                    error
-                );
+                // No session to clear or error clearing session
             }
         };
 
@@ -97,24 +93,17 @@ const AuthForm = ({ type }: { type: string }) => {
                         return;
                     } else {
                         toast.success(
-                            'Account created successfully! Redirecting to dashboard...'
-                        );
-                        console.log(
-                            'Sign up successful, attempting redirect...'
+                            'Account created successfully!'
                         );
 
                         // Try the robust redirect first, with simple fallback
                         try {
                             await forceRedirectAfterAuth();
                         } catch (redirectError) {
-                            console.log(
-                                'Robust redirect failed, using simple redirect...'
-                            );
                             simpleRedirectAfterAuth();
                         }
                     }
                 } catch (signUpError) {
-                    console.error('Sign up error:', signUpError);
                     toast.error('Failed to create account. Please try again.');
                 }
             }
@@ -128,19 +117,13 @@ const AuthForm = ({ type }: { type: string }) => {
 
                     if (response) {
                         toast.success(
-                            'Successfully signed in! Redirecting to dashboard...'
-                        );
-                        console.log(
-                            'Sign in successful, attempting redirect...'
+                            'Successfully signed in!'
                         );
 
                         // Try the robust redirect first, with simple fallback
                         try {
                             await forceRedirectAfterAuth();
                         } catch (redirectError) {
-                            console.log(
-                                'Robust redirect failed, using simple redirect...'
-                            );
                             simpleRedirectAfterAuth();
                         }
                     } else {
@@ -149,12 +132,10 @@ const AuthForm = ({ type }: { type: string }) => {
                         );
                     }
                 } catch (signInError) {
-                    console.error('Sign in error:', signInError);
                     toast.error('Sign in failed. Please try again.');
                 }
             }
         } catch (error) {
-            console.log(error);
             if (type === 'sign-up') {
                 toast.error('Failed to create account. Please try again.');
             }

@@ -222,7 +222,6 @@ const Home = async (props: SearchParamProps) => {
             </section>
         );
     } catch (error) {
-        console.error('Error loading home page:', error);
         return (
             <SessionHandler showLogout={true}>
                 <section className='home'>

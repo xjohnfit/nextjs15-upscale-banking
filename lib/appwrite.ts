@@ -31,20 +31,12 @@ export async function createSessionClient() {
             },
         };
     } catch (error: any) {
-        console.error('Failed to create session client:', error);
-
         // Clear invalid session cookie
         try {
             const cookieStore = await cookies();
             cookieStore.delete('appwrite-session');
-            console.log(
-                'Cleared invalid session cookie from createSessionClient'
-            );
         } catch (clearError) {
-            console.error(
-                'Failed to clear session cookie in createSessionClient:',
-                clearError
-            );
+            // Failed to clear session cookie
         }
 
         throw error;

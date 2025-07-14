@@ -70,7 +70,6 @@ const MyBanks = async () => {
             </section>
         );
     } catch (error) {
-        console.error('Error loading my banks page:', error);
         return (
             <section className='flex'>
                 <div className='my-banks'>

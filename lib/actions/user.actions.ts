@@ -32,63 +32,27 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
         );
 
         if (user.documents.length === 0) {
-            console.log('No user document found for userId:', userId);
             return null;
         }
 
         return parseStringify(user.documents[0]);
     } catch (error) {
-        console.log('Error fetching user info:', error);
         return null;
     }
 };
 
 export const signIn = async ({ email, password }: signInProps) => {
     try {
-        console.log('=== SIGN IN DEBUG START ===');
-        console.log('Sign in attempt for email:', email);
-        console.log('Environment:', process.env.NODE_ENV);
-        console.log(
-            'Appwrite endpoint:',
-            process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT
-        );
-        console.log(
-            'Appwrite project:',
-            process.env.NEXT_PUBLIC_APPWRITE_PROJECT
-        );
-
         const { account } = await createAdminClient();
-        console.log('Admin client created successfully');
 
         const session = await account.createEmailPasswordSession(
             email,
             password
         );
-        console.log('Session created successfully:', {
-            userId: session.userId,
-            sessionId: session.$id,
-            expire: session.expire,
-        });
 
         const cookieStore = await cookies();
-        console.log('Cookie store obtained successfully');
 
-        // Try setting a test cookie first
-        try {
-            cookieStore.set('test-cookie', 'test-value', {
-                path: '/',
-                httpOnly: true,
-                sameSite: 'lax',
-                secure: false, // Don't use secure for HTTP connections
-                maxAge: 60 * 60,
-            });
-            console.log('Test cookie set successfully');
-        } catch (testCookieError) {
-            console.error('Failed to set test cookie:', testCookieError);
-        }
-
-        // Now set the actual session cookie
-        // Fix: Don't use secure cookies on HTTP connections
+        // Set the session cookie
         const isSecureConnection =
             process.env.FORCE_SECURE_COOKIES === 'true' || false; // Force false for HTTP production
 
@@ -96,47 +60,23 @@ export const signIn = async ({ email, password }: signInProps) => {
             path: '/',
             httpOnly: true,
             sameSite: 'lax' as const,
-            secure: isSecureConnection, // Only secure if actually using HTTPS
+            secure: isSecureConnection,
             maxAge: 60 * 60 * 24 * 30, // 30 days
         };
-        console.log('Cookie options:', cookieOptions);
-        console.log('Is secure connection:', isSecureConnection);
-        console.log(
-            'Request headers available:',
-            typeof globalThis !== 'undefined' ? 'yes' : 'no'
-        );
 
         cookieStore.set('appwrite-session', session.secret, cookieOptions);
-        console.log(
-            'Session cookie set successfully with secret length:',
-            session.secret.length
-        );
-
-        // Verify cookie was set
-        const setCookie = cookieStore.get('appwrite-session');
-        console.log('Cookie verification:', setCookie ? 'found' : 'not found');
 
         // Try to get user info, but don't fail signin if it doesn't work
         let user;
         try {
             user = await getUserInfo({ userId: session.userId });
-            console.log('User info retrieved successfully');
         } catch (userInfoError) {
-            console.log(
-                'Could not fetch user info, but signin was successful:',
-                userInfoError
-            );
             // Return a minimal user object so frontend knows signin worked
             user = { userId: session.userId, email };
         }
 
-        console.log('=== SIGN IN DEBUG END ===');
         return parseStringify(user);
     } catch (error: any) {
-        console.error('=== SIGN IN ERROR ===');
-        console.error('Sign in error:', error);
-        console.error('Error message:', error?.message);
-        console.error('Error stack:', error?.stack);
         return null;
     }
 };
@@ -147,22 +87,15 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     let newUserAccount;
 
     try {
-        console.log('=== SIGNUP DEBUG START ===');
-        console.log('Signup attempt for email:', email);
-        console.log('Environment:', process.env.NODE_ENV);
-
         const { account, database } = await createAdminClient();
-        console.log('Admin client created successfully');
 
         // Create user account in Appwrite Auth
-        console.log('Creating user account in Appwrite Auth...');
         newUserAccount = await account.create(
             ID.unique(),
             email,
             password,
             `${firstName} ${lastName}`
         );
-        console.log('User account created successfully:', newUserAccount.$id);
 
         if (!newUserAccount) throw new Error('Error creating user');
 
@@ -171,7 +104,6 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         let dwollaCustomerId;
 
         try {
-            console.log('Creating Dwolla customer...');
             dwollaCustomerUrl = await createDwollaCustomer({
                 ...userData,
                 type: 'personal',
@@ -179,29 +111,20 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
             if (dwollaCustomerUrl) {
                 dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
-                console.log(
-                    'Dwolla customer created successfully:',
-                    dwollaCustomerId
-                );
             }
         } catch (dwollaError) {
-            console.error('Dwolla customer creation failed:', dwollaError);
             // Set default values instead of null to satisfy Appwrite schema
             dwollaCustomerUrl = 'pending';
             dwollaCustomerId = 'pending';
         }
 
         // Create user document in database
-        console.log('=== DATABASE CREATION DEBUG ===');
         const userDocData = {
             ...userData,
             userId: newUserAccount.$id,
             dwollaCustomerId: dwollaCustomerId || 'pending',
             dwollaCustomerUrl: dwollaCustomerUrl || 'pending',
         };
-        console.log('About to create user document with data:', userDocData);
-        console.log('Database ID:', DATABASE_ID);
-        console.log('User Collection ID:', USER_COLLECTION_ID);
 
         let newUser;
         try {
@@ -211,22 +134,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
                 ID.unique(),
                 userDocData
             );
-            console.log('User document created successfully:', newUser.$id);
         } catch (dbError: any) {
-            console.error('=== DATABASE CREATION ERROR ===');
-            console.error('Database creation error:', dbError);
-            console.error('Error details:', {
-                message: dbError?.message,
-                code: dbError?.code,
-                type: dbError?.type,
-                response: dbError?.response,
-            });
-
-            // If user account was created but database document failed,
-            // we should clean up the auth account or handle this gracefully
-            console.log(
-                'Auth account was created but database document failed'
-            );
             throw new Error(
                 `Database document creation failed: ${
                     dbError?.message || 'Unknown error'
@@ -235,82 +143,44 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         }
 
         // Create session
-        console.log('Creating session...');
         const session = await account.createEmailPasswordSession(
             email,
             password
         );
-        console.log('Signup session created successfully:', session.$id);
 
         const cookieStore = await cookies();
         cookieStore.set('appwrite-session', session.secret, {
             path: '/',
             httpOnly: true,
-            sameSite: 'lax', // Changed from 'strict' to 'lax' for better production compatibility
-            secure: false, // Don't use secure for HTTP connections
+            sameSite: 'lax',
+            secure: false,
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
-        console.log('Signup cookie set successfully');
-        console.log('=== SIGNUP DEBUG END ===');
 
         return parseStringify(newUser);
     } catch (error: any) {
-        console.error('=== SIGNUP ERROR ===');
-        console.error('Signup error details:', {
-            message: error?.message,
-            code: error?.code,
-            type: error?.type,
-            stack: error?.stack,
-        });
-
-        // If we created an auth account but failed later, log this
-        if (newUserAccount) {
-            console.error(
-                'Auth account was created but signup failed:',
-                newUserAccount.$id
-            );
-        }
-
         return null;
     }
 };
 
 export async function getLoggedInUser() {
     try {
-        console.log('=== GET LOGGED IN USER DEBUG START ===');
-
         // First check if we have a session cookie
         const cookieStore = await cookies();
         const sessionCookie = cookieStore.get('appwrite-session');
 
-        console.log('Session cookie exists:', !!sessionCookie);
-        console.log(
-            'Session cookie value length:',
-            sessionCookie?.value?.length || 0
-        );
-
         if (!sessionCookie || !sessionCookie.value) {
-            console.log('No session cookie found, user not logged in');
             return null;
         }
 
         const { account } = await createSessionClient();
-        console.log('Session client created successfully');
 
         const result = await account.get();
-        console.log('Account.get() successful, user ID:', result.$id);
 
         const user = await getUserInfo({ userId: result.$id });
-        console.log('User info retrieved successfully:', !!user);
 
-        console.log('=== GET LOGGED IN USER DEBUG END ===');
         return parseStringify(user);
     } catch (error: any) {
-        console.error('=== GET LOGGED IN USER ERROR ===');
-        console.error('Get logged in user error:', error);
-        console.error('Error type:', error?.type);
-        console.error('Error code:', error?.code);
-
         // Clear invalid session cookie for various Appwrite authentication errors
         const shouldClearSession =
             error &&
@@ -324,12 +194,6 @@ export async function getLoggedInUser() {
                 error.type === 'user_invalid_token' ||
                 error.type === 'general_unauthorized_scope' ||
                 error.code === 401);
-
-        if (shouldClearSession) {
-            console.log(
-                'Invalid session detected - session should be cleared by middleware or route handler'
-            );
-        }
 
         return null;
     }
@@ -349,8 +213,6 @@ export const logoutAccount = async () => {
 
 export const createLinkToken = async (user: User) => {
     try {
-        console.log('Creating Plaid link token for user:', user.$id);
-
         const tokenParams = {
             user: {
                 client_user_id: user.$id,
@@ -359,15 +221,13 @@ export const createLinkToken = async (user: User) => {
             products: ['auth', 'transactions'] as Products[],
             language: 'en',
             country_codes: ['US'] as CountryCode[],
+            // Leave redirect_uri undefined to let Plaid handle OAuth within modal
         };
 
-        console.log('Plaid token params:', tokenParams);
         const response = await plaidClient.linkTokenCreate(tokenParams);
 
-        console.log('Plaid link token created successfully');
         return parseStringify({ linkToken: response.data.link_token });
     } catch (error) {
-        console.error('Error creating Plaid link token:', error);
         return null;
     }
 };
@@ -399,7 +259,7 @@ export const createBankAccount = async ({
 
         return parseStringify(bankAccount);
     } catch (error) {
-        console.log(error);
+        return null;
     }
 };
 
@@ -408,8 +268,6 @@ export const exchangePublicToken = async ({
     user,
 }: exchangePublicTokenProps) => {
     try {
-        console.log('Starting public token exchange for user:', user.$id);
-
         // Exchange public token for access token and item ID
         const response = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,
@@ -418,15 +276,12 @@ export const exchangePublicToken = async ({
         const accessToken = response.data.access_token;
         const itemId = response.data.item_id;
 
-        console.log('Token exchange successful, item ID:', itemId);
-
         // Get account information from Plaid using the access token
         const accountsResponse = await plaidClient.accountsGet({
             access_token: accessToken,
         });
 
         const accountData = accountsResponse.data.accounts[0];
-        console.log('Account data retrieved:', accountData.name);
 
         // Create a processor token for Dwolla using the access token and account ID
         const request: ProcessorTokenCreateRequest = {
@@ -439,7 +294,6 @@ export const exchangePublicToken = async ({
             request
         );
         const processorToken = processorTokenResponse.data.processor_token;
-        console.log('Processor token created successfully');
 
         // Create a funding source URL for the account using the Dwolla customer ID, processor token, and bank name
         const fundingSourceUrl = await addFundingSource({
@@ -453,8 +307,6 @@ export const exchangePublicToken = async ({
             throw new Error('Failed to create funding source URL');
         }
 
-        console.log('Funding source created successfully');
-
         // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
         await createBankAccount({
             userId: user.$id,
@@ -465,8 +317,6 @@ export const exchangePublicToken = async ({
             shareableId: encryptId(accountData.account_id),
         });
 
-        console.log('Bank account created successfully');
-
         // Revalidate the path to reflect the changes
         revalidatePath('/');
 
@@ -475,10 +325,6 @@ export const exchangePublicToken = async ({
             publicTokenExchange: 'complete',
         });
     } catch (error) {
-        console.error(
-            'An error occurred while exchanging public token:',
-            error
-        );
         throw error; // Re-throw so PlaidLink can handle it
     }
 };
@@ -495,7 +341,7 @@ export const getBanks = async ({ userId }: getBanksProps) => {
 
         return parseStringify(banks.documents);
     } catch (error) {
-        console.log(error);
+        return [];
     }
 };
 
@@ -512,7 +358,6 @@ export const getBank = async ({ documentId }: getBankProps) => {
 
         return parseStringify(bank);
     } catch (error) {
-        console.log('Error getting bank:', error);
         return null;
     }
 };
@@ -533,7 +378,7 @@ export const getBankByAccountId = async ({
 
         return parseStringify(bank.documents[0]);
     } catch (error) {
-        console.log(error);
+        return null;
     }
 };
 
@@ -541,13 +386,10 @@ export const clearInvalidSession = async () => {
     'use server';
 
     try {
-        console.log('Clearing invalid session cookie...');
         const cookieStore = await cookies();
         cookieStore.delete('appwrite-session');
-        console.log('Invalid session cookie cleared successfully');
         return { success: true };
     } catch (error) {
-        console.error('Failed to clear invalid session cookie:', error);
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
