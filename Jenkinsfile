@@ -14,17 +14,17 @@ pipeline {
         IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
     stages {
-        stage('Clean Workspace') {
+        stage('1. Clean Workspace') {
             steps {
                 cleanWs()
             }
         }
-        stage('Checkout from Git') {
+        stage('2. Checkout from Git') {
             steps {
                 git branch: 'main', url: 'https://github.com/xjohnfit/nextjs15-upscale-banking'
             }
         }
-        stage("SonarQube Analysis") {
+        stage("3. SonarQube Analysis") {
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Upscale-Banking \
@@ -32,30 +32,30 @@ pipeline {
                 }
             }
         }
-        stage("Quality Gate") {
+        stage("4. Quality Gate") {
             steps {
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube-token'
                 }
             }
         }
-        stage('Install Dependencies') {
+        stage("5. Install Dependencies") {
             steps {
                 sh "npm install"
             }
         }
-	    stage('Owasp Fs Scan') {
+	    stage('6. Owasp File System Scan') {
 	        steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'dp-check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        stage('Trivy Scan') {
+        stage("7. Trivy File System Scan") {
             steps {
                 sh "trivy fs . > trivyfs.txt"
             }
         }
-        stage("Build & Push Docker Image") {
+        stage("8. Build & Push Docker Image") {
             steps {
                 script {
                     docker.withRegistry('', DOCKER_PASS) {
@@ -68,14 +68,14 @@ pipeline {
                 }
             }
         }
-        stage("Trivy Image Scan") {
+        stage("9. Trivy Image Scan") {
 	        steps {
                 script {
 	                sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image xjohnfit/nextjs15-upscale-banking:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table > trivyimage.txt')
                 }
             }
         }
-	    stage('Cleanup Artifacts') {
+	    stage("10. Cleanup Artifacts") {
 	        steps {
                 script {
                     sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
@@ -83,7 +83,7 @@ pipeline {
                 }
             }
         }
-        stage("Update Kubernetes Deployment for ArgoCD") {
+        stage("11. Update Kubernetes Deployment for ArgoCD") {
             steps {
                 script {
                     sh """
@@ -91,7 +91,7 @@ pipeline {
                     git config --global user.email "xjohnfitcodes@gmail.com"
 
                     # Update image tag in deployment YAML
-                    sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yaml
+                    sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yml
 
                     git add kubernetes/deployment.yaml
                     git commit -m "Update deployment image to ${IMAGE_TAG} via Jenkins"
