@@ -9,8 +9,8 @@ import '@/lib/env-validation'; // Runtime environment validation
 
 import * as Sentry from '@sentry/nextjs';
 
-const inter = Inter({ 
-    subsets: ['latin'], 
+const inter = Inter({
+    subsets: ['latin'],
     variable: '--font-inter',
     display: 'swap',
     preload: true,

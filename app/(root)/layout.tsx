@@ -23,15 +23,17 @@ export default async function RootLayout({
                 <div className='root-layout'>
                     <div className='flex items-center gap-3 md:gap-5'>
                         <Image
-                        src='/icons/logo.svg'
-                        width={30}
-                        height={30}
-                        alt='logo'
-                        priority
-                    />
-                    <div>
-                        <h1 className='text-18 font-ibm-plex-serif font-bold text-black-1'>Upscale Banking</h1>
-                    </div>
+                            src='/icons/logo.svg'
+                            width={30}
+                            height={30}
+                            alt='logo'
+                            priority
+                        />
+                        <div>
+                            <h1 className='text-18 font-ibm-plex-serif font-bold text-black-1'>
+                                Upscale Banking
+                            </h1>
+                        </div>
                     </div>
                     <div>
                         <MobileNav user={loggedIn} />

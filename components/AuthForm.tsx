@@ -92,9 +92,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         );
                         return;
                     } else {
-                        toast.success(
-                            'Account created successfully!'
-                        );
+                        toast.success('Account created successfully!');
 
                         // Try the robust redirect first, with simple fallback
                         try {
@@ -116,9 +114,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     });
 
                     if (response) {
-                        toast.success(
-                            'Successfully signed in!'
-                        );
+                        toast.success('Successfully signed in!');
 
                         // Try the robust redirect first, with simple fallback
                         try {
