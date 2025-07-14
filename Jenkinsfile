@@ -44,8 +44,8 @@ pipeline {
                 sh "npm install"
             }
         }
-	stage('Owasp Fs Scan') {
-	    steps {
+	    stage('Owasp Fs Scan') {
+	        steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'dp-check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
@@ -69,19 +69,36 @@ pipeline {
             }
         }
         stage("Trivy Image Scan") {
-	  steps {
-            script {
-	            sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image xjohnfit/nextjs15-upscale-banking:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table > trivyimage.txt')
+	        steps {
+                script {
+	                sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image xjohnfit/nextjs15-upscale-banking:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table > trivyimage.txt')
+                }
             }
-          }
         }
-	stage ('Cleanup Artifacts') {
-	  steps {
-            script {
-              sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
-              sh "docker rmi ${IMAGE_NAME}:latest"
+	    stage('Cleanup Artifacts') {
+	        steps {
+                script {
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+                }
             }
-          }
+        }
+        stage("Update Kubernetes Deployment for ArgoCD") {
+            steps {
+                script {
+                    sh """
+                    git config --global user.name "John Rocha"
+                    git config --global user.email "xjohnfitcodes@gmail.com"
+
+                    # Update image tag in deployment YAML
+                    sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yaml
+
+                    git add kubernetes/deployment.yaml
+                    git commit -m "Update deployment image to ${IMAGE_TAG} via Jenkins"
+                    git push origin main
+                    """
+                }
+            }
         }
     }
     post {
