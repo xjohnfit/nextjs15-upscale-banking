@@ -9,11 +9,18 @@ import '@/lib/env-validation'; // Runtime environment validation
 
 import * as Sentry from '@sentry/nextjs';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ 
+    subsets: ['latin'], 
+    variable: '--font-inter',
+    display: 'swap',
+    preload: true,
+});
 const ibmPlexSerif = IBM_Plex_Serif({
     subsets: ['latin'],
     weight: ['400', '700'],
     variable: '--font-ibm-plex-serif',
+    display: 'swap',
+    preload: true,
 });
 
 export const metadata: Metadata = {

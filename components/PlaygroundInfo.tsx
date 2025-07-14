@@ -16,7 +16,7 @@ const PlaygroundInfo = () => {
                         Email
                     </span>
                     <span className='text-gray-800 text-xs font-mono select-all px-2 py-1 bg-white rounded'>
-                        {'xjohnfitcodes@gmail.com'}
+                        {'john-demo@sandbox.com'}
                     </span>
                 </div>
                 <div className='flex items-center justify-between'>
@@ -31,22 +31,6 @@ const PlaygroundInfo = () => {
             <p className='text-[10px] text-gray-400 mt-5 text-center italic'>
                 Sandbox only. No real transactions will occur.
             </p>
-            <div className='w-full bg-blue-50 rounded-xl p-4 mt-4'>
-                <h3 className='font-medium text-blue-900 text-xs mb-2'>
-                    💡 Bank Connection Tip
-                </h3>
-                <p className='text-[10px] text-blue-700 leading-relaxed'>
-                    For seamless connection without popups, select these banks
-                    in Plaid:
-                    <br />• <strong>First Platypus Bank</strong>
-                    <br />• <strong>Tattersall Federal Credit Union</strong>
-                    <br />• <strong>Houndstooth Bank</strong>
-                    <br />
-                    <span className='text-blue-600 italic'>
-                        These banks complete authentication within the modal.
-                    </span>
-                </p>
-            </div>
         </section>
     );
 };

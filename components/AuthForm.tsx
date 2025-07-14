@@ -155,6 +155,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         width={30}
                         height={30}
                         alt='Upscale logo'
+                        priority
                     />
                     <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1'>
                         Upscale Banking
