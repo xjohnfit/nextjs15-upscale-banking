@@ -17,7 +17,7 @@ import {
 } from '@/lib/actions/user.actions';
 import Image from 'next/image';
 
-const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
+const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
     const router = useRouter();
 
     const [token, setToken] = useState('');
@@ -77,23 +77,9 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
         }
     }, []);
 
-    const onEvent = useCallback<PlaidLinkOnEvent>(
-        (eventName, metadata) => {
-            console.log('Plaid Link event:', { eventName, metadata });
-
-            // Close mobile nav sheet when Plaid opens successfully
-            if (
-                eventName === 'OPEN' &&
-                variant === 'mobile-nav' &&
-                onSheetClose
-            ) {
-                setTimeout(() => {
-                    onSheetClose();
-                }, 100);
-            }
-        },
-        [variant, onSheetClose]
-    );
+    const onEvent = useCallback<PlaidLinkOnEvent>((eventName, metadata) => {
+        console.log('Plaid Link event:', { eventName, metadata });
+    }, []);
 
     const config: PlaidLinkOptions = {
         token,
@@ -108,14 +94,6 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
     const { open, ready, error } = usePlaidLink(config);
 
     const handleClick = () => {
-        console.log(
-            'handleClick called - ready:',
-            ready,
-            'loading:',
-            loading,
-            'token:',
-            !!token
-        );
         if (ready && !loading) {
             console.log('Opening Plaid Link...');
             open();
@@ -169,22 +147,10 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (ready && !loading && token) {
-                            console.log(
-                                'PlaidLink mobile-nav clicked, opening Plaid...'
-                            );
-                            handleClick();
-                        } else {
-                            console.log('PlaidLink not ready:', {
-                                ready,
-                                loading,
-                                hasToken: !!token,
-                            });
-                        }
+                        handleClick();
                     }}
                     disabled={isDisabled}
-                    className='mobilenav-sheet_close w-full !justify-start !bg-bank-gradient hover:!bg-bank-gradient cursor-pointer'
-                    type='button'>
+                    className='mobilenav-sheet_close w-full !justify-start !bg-bank-gradient hover:!bg-bank-gradient cursor-pointer'>
                     <Image
                         src='/icons/connect-bank.svg'
                         alt='Connect Bank'
