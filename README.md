@@ -1,6 +1,6 @@
 # 🏦 Upscale Banking - Next.js 15 Banking Application
 
-A modern, full-stack banking application built with Next.js 15, featuring real-time transactions, secure authentication, comprehensive financial management tools, and enterprise-grade CI/CD deployment.
+A modern, full-stack banking application built with Next.js 15, featuring real-time transactions, secure authentication, comprehensive financial management tools, and enterprise-grade CI/CD deployment with optimized mobile experience.
 
 ## 🚀 Project Overview
 
@@ -9,11 +9,11 @@ Upscale Banking is a sophisticated financial management platform that provides u
 ### ✨ Key Features
 
 - **🔐 Secure Authentication**: Multi-factor authentication with Appwrite
-- **🏦 Bank Account Integration**: Connect multiple bank accounts via Plaid
+- **🏦 Bank Account Integration**: Connect multiple bank accounts via Plaid with optimized mobile experience
 - **💳 Real-time Transactions**: View and manage transactions across all accounts
 - **💸 Money Transfers**: Secure peer-to-peer payments through Dwolla
 - **📊 Financial Analytics**: Interactive charts and spending insights
-- **📱 Responsive Design**: Mobile-first approach with Tailwind CSS
+- **📱 Mobile-First Design**: Optimized mobile experience with touch-friendly Plaid integration
 - **🎨 Modern UI**: Clean, intuitive interface with Radix UI components
 - **📈 Transaction History**: Comprehensive transaction tracking and categorization
 - **🔄 Real-time Updates**: Live balance updates and transaction notifications
@@ -22,6 +22,8 @@ Upscale Banking is a sophisticated financial management platform that provides u
 - **☸️ Kubernetes Ready**: Production-ready Kubernetes manifests
 - **📊 Monitoring**: Integrated Sentry for error tracking and performance monitoring
 - **🔒 Security Scanning**: Automated vulnerability scanning with Trivy and OWASP
+- **🎯 Optimized Performance**: Font preloading, image optimization, and mobile touch enhancements
+
 
 ## 🛠️ Technologies Used
 
@@ -82,6 +84,22 @@ Upscale Banking is a sophisticated financial management platform that provides u
 
 - **Sonner** - Toast notifications
 - **Tailwind CSS Animate** - Animation utilities
+
+## 🎮 Demo & Testing
+
+### Demo Account Access
+
+Experience the full functionality without signing up using our sandbox demo account:
+
+**Email**: `john-demo@sandbox.com`  
+**Password**: `demoPassword123`
+
+### Sandbox Environment
+
+- All transactions are simulated and no real money is involved
+- Plaid sandbox provides realistic banking data for testing
+- Dwolla sandbox enables payment flow testing without actual transfers
+- Full feature access including transfers, analytics, and account management
 
 ## 📁 Project Structure
 
