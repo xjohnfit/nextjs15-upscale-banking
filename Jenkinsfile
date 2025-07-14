@@ -93,7 +93,7 @@ pipeline {
                     # Update image tag in deployment YAML
                     sed -i 's|image: .*/nextjs15-upscale-banking:.*|image: xjohnfit/nextjs15-upscale-banking:${IMAGE_TAG}|g' kubernetes/deployment.yml
 
-                    git add kubernetes/deployment.yaml
+                    git add kubernetes/deployment.yml
                     git commit -m "Update deployment image to ${IMAGE_TAG} via Jenkins"
                     git push origin main
                     """
