@@ -77,9 +77,23 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
         }
     }, []);
 
-    const onEvent = useCallback<PlaidLinkOnEvent>((eventName, metadata) => {
-        console.log('Plaid Link event:', { eventName, metadata });
-    }, []);
+    const onEvent = useCallback<PlaidLinkOnEvent>(
+        (eventName, metadata) => {
+            console.log('Plaid Link event:', { eventName, metadata });
+
+            // Close mobile nav sheet when Plaid opens successfully
+            if (
+                eventName === 'OPEN' &&
+                variant === 'mobile-nav' &&
+                onSheetClose
+            ) {
+                setTimeout(() => {
+                    onSheetClose();
+                }, 100);
+            }
+        },
+        [variant, onSheetClose]
+    );
 
     const config: PlaidLinkOptions = {
         token,
@@ -157,16 +171,9 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
                         e.stopPropagation();
                         if (ready && !loading && token) {
                             console.log(
-                                'PlaidLink mobile-nav clicked, closing sheet and opening Plaid...'
+                                'PlaidLink mobile-nav clicked, opening Plaid...'
                             );
-                            // Close the mobile navigation sheet first
-                            if (onSheetClose) {
-                                onSheetClose();
-                            }
-                            // Small delay to allow sheet to close before opening Plaid
-                            setTimeout(() => {
-                                handleClick();
-                            }, 100);
+                            handleClick();
                         } else {
                             console.log('PlaidLink not ready:', {
                                 ready,

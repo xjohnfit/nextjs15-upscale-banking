@@ -55,70 +55,57 @@ const MobileNav = ({ user }: MobileNavProps) => {
 
                     {/* Scrollable content area */}
                     <div className='flex-1 overflow-y-auto'>
-                        <SheetClose asChild>
-                            <nav className='flex flex-col gap-2 p-4'>
-                                {sidebarLinks.map((item) => {
-                                    const isActive =
-                                        pathname === item.route ||
-                                        pathname.startsWith(`${item.route}/`);
+                        <nav className='flex flex-col gap-2 p-4'>
+                            {sidebarLinks.map((item) => {
+                                const isActive =
+                                    pathname === item.route ||
+                                    pathname.startsWith(`${item.route}/`);
 
-                                    return (
-                                        <SheetClose
-                                            asChild
-                                            key={item.route}>
-                                            <Link
-                                                href={item.route}
-                                                key={item.label}
+                                return (
+                                    <SheetClose
+                                        asChild
+                                        key={item.route}>
+                                        <Link
+                                            href={item.route}
+                                            className={cn(
+                                                'mobilenav-sheet_close w-full',
+                                                {
+                                                    'bg-bank-gradient':
+                                                        isActive,
+                                                }
+                                            )}>
+                                            <Image
+                                                src={item.imgURL}
+                                                alt={item.label}
+                                                width={20}
+                                                height={20}
+                                                className={cn({
+                                                    'brightness-[3] invert-0':
+                                                        isActive,
+                                                })}
+                                            />
+                                            <p
                                                 className={cn(
-                                                    'mobilenav-sheet_close w-full',
+                                                    'text-16 font-semibold text-black-2',
                                                     {
-                                                        'bg-bank-gradient':
-                                                            isActive,
+                                                        'text-white': isActive,
                                                     }
                                                 )}>
-                                                <Image
-                                                    src={item.imgURL}
-                                                    alt={item.label}
-                                                    width={20}
-                                                    height={20}
-                                                    className={cn({
-                                                        'brightness-[3] invert-0':
-                                                            isActive,
-                                                    })}
-                                                />
-                                                <p
-                                                    className={cn(
-                                                        'text-16 font-semibold text-black-2',
-                                                        {
-                                                            'text-white':
-                                                                isActive,
-                                                        }
-                                                    )}>
-                                                    {item.label}
-                                                </p>
-                                            </Link>
-                                        </SheetClose>
-                                    );
-                                })}
-                            </nav>
-                        </SheetClose>
+                                                {item.label}
+                                            </p>
+                                        </Link>
+                                    </SheetClose>
+                                );
+                            })}
+                        </nav>
 
                         <div className='px-4 pb-4'>
-                            <div
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                }}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onTouchStart={(e) => e.stopPropagation()}
-                                style={{ isolation: 'isolate' }}>
-                                <PlaidLink
-                                    user={user}
-                                    variant='mobile-nav'
-                                    type='mobile'
-                                    onSheetClose={() => setIsOpen(false)}
-                                />
-                            </div>
+                            <PlaidLink
+                                user={user}
+                                variant='mobile-nav'
+                                type='mobile'
+                                onSheetClose={() => setIsOpen(false)}
+                            />
                         </div>
                     </div>
 
