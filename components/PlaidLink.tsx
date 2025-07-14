@@ -94,7 +94,14 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
     const { open, ready, error } = usePlaidLink(config);
 
     const handleClick = () => {
-        console.log('handleClick called - ready:', ready, 'loading:', loading, 'token:', !!token);
+        console.log(
+            'handleClick called - ready:',
+            ready,
+            'loading:',
+            loading,
+            'token:',
+            !!token
+        );
         if (ready && !loading) {
             console.log('Opening Plaid Link...');
             open();
@@ -149,7 +156,9 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
                         e.preventDefault();
                         e.stopPropagation();
                         if (ready && !loading && token) {
-                            console.log('PlaidLink mobile-nav clicked, closing sheet and opening Plaid...');
+                            console.log(
+                                'PlaidLink mobile-nav clicked, closing sheet and opening Plaid...'
+                            );
                             // Close the mobile navigation sheet first
                             if (onSheetClose) {
                                 onSheetClose();
@@ -159,7 +168,11 @@ const PlaidLink = ({ user, variant, type, onSheetClose }: PlaidLinkProps) => {
                                 handleClick();
                             }, 100);
                         } else {
-                            console.log('PlaidLink not ready:', { ready, loading, hasToken: !!token });
+                            console.log('PlaidLink not ready:', {
+                                ready,
+                                loading,
+                                hasToken: !!token,
+                            });
                         }
                     }}
                     disabled={isDisabled}

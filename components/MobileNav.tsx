@@ -24,7 +24,9 @@ const MobileNav = ({ user }: MobileNavProps) => {
 
     return (
         <section className='w-full max-w-[264px]'>
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <Sheet
+                open={isOpen}
+                onOpenChange={setIsOpen}>
                 <SheetTrigger>
                     <Image
                         src='/icons/hamburger.svg'
@@ -102,7 +104,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                         </SheetClose>
 
                         <div className='px-4 pb-4'>
-                            <div 
+                            <div
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
