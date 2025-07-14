@@ -178,6 +178,7 @@ declare interface PlaidLinkProps {
     variant?: 'primary' | 'ghost' | 'mobile-nav';
     dwollaCustomerId?: string;
     type: string;
+    onSheetClose?: () => void;
 }
 
 declare interface AuthFormProps {

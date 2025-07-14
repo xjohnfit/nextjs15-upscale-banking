@@ -14,15 +14,17 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import Footer from './Footer';
 import PlaidLink from './PlaidLink';
 
 const MobileNav = ({ user }: MobileNavProps) => {
     const pathname = usePathname();
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <section className='w-full max-w-[264px]'>
-            <Sheet>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger>
                     <Image
                         src='/icons/hamburger.svg'
@@ -100,11 +102,21 @@ const MobileNav = ({ user }: MobileNavProps) => {
                         </SheetClose>
 
                         <div className='px-4 pb-4'>
-                            <PlaidLink
-                                user={user}
-                                variant='mobile-nav'
-                                type='mobile'
-                            />
+                            <div 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                style={{ isolation: 'isolate' }}>
+                                <PlaidLink
+                                    user={user}
+                                    variant='mobile-nav'
+                                    type='mobile'
+                                    onSheetClose={() => setIsOpen(false)}
+                                />
+                            </div>
                         </div>
                     </div>
 
