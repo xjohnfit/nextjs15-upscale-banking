@@ -295,6 +295,29 @@ export const exchangePublicToken = async ({
         );
         const processorToken = processorTokenResponse.data.processor_token;
 
+        // Check if this bank account already exists for this user
+        const existingBank = await getBankByAccountId({
+            accountId: accountData.account_id,
+        });
+
+        if (existingBank && existingBank.userId === user.$id) {
+            console.log('Bank account already exists for user:', {
+                userId: user.$id,
+                accountId: accountData.account_id,
+                bankName: accountData.name,
+                existingBankId: existingBank.$id,
+            });
+
+            // Revalidate the path to reflect any changes
+            revalidatePath('/');
+
+            // Return success since the bank is already connected
+            return parseStringify({
+                publicTokenExchange: 'complete',
+                message: 'Bank account already connected',
+            });
+        }
+
         // Create a funding source URL for the account using the Dwolla customer ID, processor token, and bank name
         const fundingSourceUrl = await addFundingSource({
             dwollaCustomerId: user.dwollaCustomerId,
@@ -302,9 +325,16 @@ export const exchangePublicToken = async ({
             bankName: accountData.name,
         });
 
-        // If the funding source URL is not created, throw an error
+        // If the funding source URL is not created, provide more detailed error information
         if (!fundingSourceUrl) {
-            throw new Error('Failed to create funding source URL');
+            console.error('Failed to create funding source URL:', {
+                dwollaCustomerId: user.dwollaCustomerId,
+                bankName: accountData.name,
+                processorTokenExists: !!processorToken,
+            });
+            throw new Error(
+                'Failed to create funding source URL. Please check Dwolla configuration and ensure your account is properly set up.'
+            );
         }
 
         // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
