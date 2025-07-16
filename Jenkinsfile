@@ -104,6 +104,30 @@ pipeline {
                     }
                 }
             }
+        }
+        stage("12. Docker Clean-up") {
+            steps {
+                script {
+                    sh '''
+                    echo "🧹 Cleaning up Docker resources..."
+
+                    # Stop and remove exited containers
+                    docker container prune -f
+
+                    # Remove dangling and unused images
+                    docker image prune -f
+
+                    # Remove unused volumes
+                    docker volume prune -f
+
+                    # Remove unused networks
+                    docker network prune -f
+
+                    # Clean up build cache
+                    docker builder prune -f
+                    '''
+                }
+            }
         }   
     }
     post {
