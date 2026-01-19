@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: upscale-banking
+  name: upscalebanking
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: upscale-banking
+      app: upscalebanking
   template:
     metadata:
       labels:
-        app: upscale-banking
+        app: upscalebanking
     spec:
       containers:
-        - name: upscale-banking
+        - name: upscalebanking
           image: xjohnfit/nextjs15-upscale-banking:latest
           imagePullPolicy: Always
           resources:
@@ -25,7 +25,7 @@ spec:
             - containerPort: 5000 # Next.js default port
           envFrom:
             - secretRef:
-                name: upscale-banking-secrets
+                name: upscalebanking-secrets
           livenessProbe:  
             httpGet:
               path: /
