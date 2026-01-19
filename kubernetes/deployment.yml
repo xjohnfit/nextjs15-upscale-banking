@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: upscale-banking-deployment
+  name: upscale-banking
 spec:
   replicas: 1
   selector:
@@ -14,16 +14,30 @@ spec:
     spec:
       containers:
         - name: upscale-banking
-          image: xjohnfit/nextjs15-upscale-banking:1.0.0-5
+          image: xjohnfit/nextjs15-upscale-banking:latest
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: "1"
             requests:
               cpu: "200m"
           ports:
-            - containerPort: 5000
+            - containerPort: 5000 # Next.js default port
           envFrom:
             - secretRef:
-                name: upscale-env
+                name: upscale-banking-secrets
+          livenessProbe:  
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          
+          readinessProbe:  
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
       imagePullSecrets:
         - name: regcred
