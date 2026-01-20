@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: upscalebanking
-          image: xjohnfit/upscale-banking:latest
+          image: xjohnfit/upscale-banking:main
           imagePullPolicy: Always
           resources:
             limits:
