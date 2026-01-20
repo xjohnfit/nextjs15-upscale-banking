@@ -57,7 +57,7 @@ jobs:
       - name: Pull image for Trivy scan
         run:  |
           echo "Pulling image for scanning..."
-          docker pull ${{ env.IMAGE_NAME }}:main
+          docker pull ${{ env.IMAGE_NAME }}:latest
           docker images | grep upscale-banking
 
       - name: Trivy Image Scan
