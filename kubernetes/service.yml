@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata: 
-  name: upscalebanking
+  name: upscale-banking
   labels:
-    app: upscalebanking
+    app: upscale-banking
 spec:
   type: ClusterIP  # Internal service (not exposed to internet directly)
   selector:
-    app: upscalebanking  # Routes traffic to pods with this label
+    app: upscale-banking  # Routes traffic to pods with this label
   ports:
     - port: 5000       # Port the service listens on
       targetPort: 5000 # Port the container listens on
