@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: upscalebanking
-          image: xjohnfit/nextjs15-upscale-banking:latest
+          image: xjohnfit/upscale-banking:latest
           imagePullPolicy: Always
           resources:
             limits:
