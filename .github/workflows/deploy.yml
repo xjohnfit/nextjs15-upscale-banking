@@ -28,7 +28,7 @@ jobs:
         continue-on-error: true
       
       - name: Trivy File Scan
-        run: trivy fs . > trivyfs. txt
+        run: trivy fs . > trivyfs.txt
         continue-on-error: true
       
       - name: Login to Docker Hub
