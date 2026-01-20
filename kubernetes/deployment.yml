@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: upscalebanking
+  name: upscale-banking
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: upscalebanking
+      app: upscale-banking
   template:
     metadata:
       labels:
-        app: upscalebanking
+        app: upscale-banking
     spec:
       containers:
         - name: upscalebanking
