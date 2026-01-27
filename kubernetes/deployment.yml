@@ -19,25 +19,31 @@ spec:
           resources:
             limits:
               cpu: "1"
+              memory: "512Mi"
             requests:
               cpu: "200m"
+              memory: "256Mi"
           ports:
             - containerPort: 5000 # Next.js default port
           envFrom:
             - secretRef:
                 name: upscalebanking-secrets
-          livenessProbe:  
+          livenessProbe:
             httpGet:
               path: /
               port: 5000
             initialDelaySeconds: 30
+            timeoutSeconds: 5
             periodSeconds: 10
-          
-          readinessProbe:  
+            failureThreshold: 3
+
+          readinessProbe:
             httpGet:
               path: /
               port: 5000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
             periodSeconds: 5
+            failureThreshold: 3
       imagePullSecrets:
         - name: regcred
