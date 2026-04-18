@@ -20,7 +20,7 @@ Upscale Banking is a sophisticated financial management platform that provides u
 - **🚀 CI/CD Pipeline**: Automated testing, security scanning, and deployment
 - **🐳 Containerized**: Docker support for consistent deployments
 - **☸️ Kubernetes Ready**: Production-ready Kubernetes manifests
-- **📊 Monitoring**: Integrated Sentry for error tracking and performance monitoring
+
 - **🔒 Security Scanning**: Automated vulnerability scanning with Trivy and OWASP
 - **🎯 Optimized Performance**: Font preloading, image optimization, and mobile touch enhancements
 
@@ -68,7 +68,7 @@ Upscale Banking is a sophisticated financial management platform that provides u
 
 ### Monitoring & Analytics
 
-- **Sentry** - Error tracking and performance monitoring with real-time alerts
+
 - **Next Themes** - Theme management for dark/light mode
 
 ### DevOps & Deployment
@@ -141,8 +141,7 @@ Experience the full functionality without signing up using our sandbox demo acco
 ├── public/                      # Static assets
 ├── Dockerfile                   # Multi-stage Docker build configuration
 ├── Jenkinsfile                  # CI/CD pipeline configuration
-├── sentry.server.config.ts      # Sentry server-side configuration
-├── sentry.edge.config.ts        # Sentry edge runtime configuration
+
 ├── instrumentation.ts           # Next.js instrumentation setup
 └── config files                 # Next.js, Tailwind, TypeScript configs
 │   │   └── transaction.actions.ts # Transaction handling
@@ -185,10 +184,7 @@ DWOLLA_SECRET=your-dwolla-secret
 DWOLLA_BASE_URL=https://api-sandbox.dwolla.com
 DWOLLA_ENV=sandbox
 
-# Sentry Configuration (for error tracking and monitoring)
-SENTRY_DSN=your-sentry-dsn
-SENTRY_ORG=your-sentry-org
-SENTRY_PROJECT=your-sentry-project
+
 
 # Jenkins CI/CD Configuration (for automated deployments)
 DOCKER_USER=your-dockerhub-username
@@ -377,7 +373,7 @@ This project includes a comprehensive Jenkins pipeline for automated testing, se
 - **CSRF protection** with Next.js built-in features
 - **Type-safe API calls** with TypeScript
 - **Input validation** with Zod schemas
-- **Real-time error tracking** with Sentry integration
+
 - **Automated security scanning** with Trivy and OWASP Dependency Check
 - **Code quality checks** with SonarQube static analysis
 - **Container security** with multi-stage Docker builds
@@ -387,27 +383,7 @@ This project includes a comprehensive Jenkins pipeline for automated testing, se
 
 ## � Monitoring & Observability
 
-### Sentry Integration
 
-The application includes comprehensive error tracking and performance monitoring:
-
-- **Real-time Error Tracking**: Automatic capture and reporting of JavaScript and server errors
-- **Performance Monitoring**: Application performance insights and optimization recommendations
-- **User Session Tracking**: Monitor user interactions and identify problematic workflows
-- **Custom Alerts**: Configurable notifications for critical errors and performance degradation
-- **Release Tracking**: Monitor deployment impact on application stability
-
-### Configuration Files
-
-- `sentry.server.config.ts` - Server-side error tracking configuration
-- `sentry.edge.config.ts` - Edge runtime monitoring setup
-- `instrumentation.ts` - Next.js instrumentation for automatic error capture
-
-### Monitoring Features
-
-- **Error Aggregation**: Intelligent grouping of similar errors
-- **Performance Insights**: Page load times, API response times, and database query performance
-- **User Impact Analysis**: Understanding how errors affect user experience
 - **Integration Dashboards**: Custom dashboards for business metrics
 - **Automated Alerting**: Slack, email, and webhook notifications
 
@@ -472,7 +448,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Appwrite** for providing comprehensive backend services
 - **Plaid** for secure banking API integration
 - **Dwolla** for reliable payment processing
-- **Sentry** for exceptional error tracking and monitoring
+
 - **Jenkins Community** for the robust CI/CD automation platform
 - **SonarQube** for code quality and security analysis tools
 - **Aqua Security** for the Trivy vulnerability scanner

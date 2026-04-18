@@ -7,7 +7,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import '@/lib/env-validation'; // Runtime environment validation
 
-import * as Sentry from '@sentry/nextjs';
+
 
 const inter = Inter({
     subsets: ['latin'],
@@ -29,9 +29,8 @@ export const metadata: Metadata = {
     icons: {
         icon: '/icons/logo.svg',
     },
-    other: {
-        ...Sentry.getTraceData(),
-    },
+    // Sentry trace data removed
+    other: {},
 };
 
 export default function RootLayout({
