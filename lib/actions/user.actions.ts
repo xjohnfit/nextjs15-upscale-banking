@@ -343,8 +343,9 @@ export async function getLoggedInUser() {
         const user = await getUserInfo({ userId: result.$id });
 
         if (!user) {
-            const [firstName = 'User', ...rest] =
-                (result.name ?? '').trim().split(/\s+/);
+            const [firstName = 'User', ...rest] = (result.name ?? '')
+                .trim()
+                .split(/\s+/);
 
             return parseStringify({
                 $id: result.$id,
