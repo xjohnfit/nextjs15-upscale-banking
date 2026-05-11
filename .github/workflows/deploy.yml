@@ -132,4 +132,4 @@ jobs:
     - name: Verify deployment
       run: |
         kubectl get pods -l app=upscale-banking
-        kubectl get ingress upscale-banking-ingress
+        kubectl get ingress upscale-banking
