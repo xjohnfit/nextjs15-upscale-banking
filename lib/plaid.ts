@@ -30,16 +30,18 @@ function getPlaidCredentials() {
     return { clientId, secret };
 }
 
-const { clientId, secret } = getPlaidCredentials();
+export function createPlaidClient() {
+    const { clientId, secret } = getPlaidCredentials();
 
-const configuration = new Configuration({
-    basePath: getPlaidEnvironment(),
-    baseOptions: {
-        headers: {
-            'PLAID-CLIENT-ID': clientId,
-            'PLAID-SECRET': secret,
+    const configuration = new Configuration({
+        basePath: getPlaidEnvironment(),
+        baseOptions: {
+            headers: {
+                'PLAID-CLIENT-ID': clientId,
+                'PLAID-SECRET': secret,
+            },
         },
-    },
-});
+    });
 
-export const plaidClient = new PlaidApi(configuration);
+    return new PlaidApi(configuration);
+}

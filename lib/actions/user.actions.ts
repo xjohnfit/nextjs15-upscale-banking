@@ -16,7 +16,7 @@ import {
     Products,
 } from 'plaid';
 
-import { plaidClient } from '@/lib/plaid';
+import { createPlaidClient } from '@/lib/plaid';
 import { revalidatePath } from 'next/cache';
 import { addFundingSource, createDwollaCustomer } from './dwolla.actions';
 import { createTransfer } from './dwolla.actions';
@@ -238,6 +238,8 @@ export const logoutAccount = async () => {
 
 export const createLinkToken = async (user: User) => {
     try {
+        const plaidClient = createPlaidClient();
+
         const tokenParams = {
             user: {
                 client_user_id: user.$id,
@@ -293,6 +295,8 @@ export const exchangePublicToken = async ({
     user,
 }: exchangePublicTokenProps) => {
     try {
+        const plaidClient = createPlaidClient();
+
         // Exchange public token for access token and item ID
         const response = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,

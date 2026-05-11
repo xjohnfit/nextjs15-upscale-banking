@@ -9,7 +9,7 @@ import {
     TransferType,
 } from 'plaid';
 
-import { plaidClient } from '../plaid';
+import { createPlaidClient } from '../plaid';
 import { parseStringify } from '../utils';
 
 import { getTransactionsByBankId } from './transaction.actions';
@@ -33,6 +33,8 @@ const getOwnerId = (value: unknown): string => {
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
     try {
+        const plaidClient = createPlaidClient();
+
         // get banks from db
         const banks = await getBanks({ userId });
 
@@ -85,6 +87,8 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 // Get one bank account
 export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     try {
+        const plaidClient = createPlaidClient();
+
         const loggedInUser = await getLoggedInUser();
 
         if (!loggedInUser?.$id) {
@@ -171,6 +175,8 @@ export const getInstitution = async ({
     institutionId,
 }: getInstitutionProps) => {
     try {
+        const plaidClient = createPlaidClient();
+
         const institutionResponse = await plaidClient.institutionsGetById({
             institution_id: institutionId,
             country_codes: ['US'] as CountryCode[],
@@ -192,6 +198,8 @@ export const getTransactions = async ({
     let transactions: any = [];
 
     try {
+        const plaidClient = createPlaidClient();
+
         // Iterate through each page of new transaction updates for item
         while (hasMore) {
             const response = await plaidClient.transactionsSync({

@@ -3,9 +3,6 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Accept build arguments for all required environment variables
-# ...existing code...
-
 WORKDIR /app
 
 # Copy package files
