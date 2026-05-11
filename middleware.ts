@@ -19,6 +19,7 @@ export function middleware(request: NextRequest) {
     const pathname = requestUrl.pathname;
 
     if (
+        pathname === '/api/health' ||
         pathname.startsWith('/_next') ||
         pathname.startsWith('/favicon.ico') ||
         pathname.startsWith('/icons')
