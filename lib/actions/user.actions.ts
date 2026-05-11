@@ -30,7 +30,7 @@ const {
 
 const SESSION_COOKIE_NAME = 'appwrite-session';
 
-const getCookieDomain = () => {
+const getLegacyCookieDomain = () => {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
     if (!siteUrl) {
@@ -69,16 +69,35 @@ const getSessionCookieOptions = () => {
         maxAge: 60 * 60 * 24 * 7,
     };
 
-    const domain = getCookieDomain();
+    const configuredDomain = process.env.APP_COOKIE_DOMAIN?.trim();
 
-    if (domain && process.env.NODE_ENV === 'production') {
+    if (configuredDomain && process.env.NODE_ENV === 'production') {
         return {
             ...options,
-            domain,
+            domain: configuredDomain,
         };
     }
 
     return options;
+};
+
+const clearSessionCookie = async () => {
+    const cookieStore = await cookies();
+    const baseOptions = getSessionCookieOptions();
+
+    cookieStore.set(SESSION_COOKIE_NAME, '', {
+        ...baseOptions,
+        maxAge: 0,
+    });
+
+    const legacyDomain = getLegacyCookieDomain();
+    if (legacyDomain && process.env.NODE_ENV === 'production') {
+        cookieStore.set(SESSION_COOKIE_NAME, '', {
+            ...baseOptions,
+            domain: legacyDomain,
+            maxAge: 0,
+        });
+    }
 };
 
 const normalizeUserId = (value: unknown): string => {
@@ -125,6 +144,7 @@ export const signIn = async ({ email, password }: signInProps) => {
             password,
         );
 
+        await clearSessionCookie();
         const cookieStore = await cookies();
         cookieStore.set(
             SESSION_COOKIE_NAME,
@@ -242,6 +262,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             password,
         );
 
+        await clearSessionCookie();
         const cookieStore = await cookies();
         cookieStore.set(
             SESSION_COOKIE_NAME,
@@ -301,7 +322,7 @@ export const logoutAccount = async () => {
     try {
         const { account } = await createSessionClient();
 
-        (await cookies()).delete(SESSION_COOKIE_NAME);
+        await clearSessionCookie();
 
         await account.deleteSession('current');
     } catch (error) {
@@ -517,8 +538,7 @@ export const clearInvalidSession = async () => {
     'use server';
 
     try {
-        const cookieStore = await cookies();
-        cookieStore.delete(SESSION_COOKIE_NAME);
+        await clearSessionCookie();
         return { success: true };
     } catch (error) {
         return {
