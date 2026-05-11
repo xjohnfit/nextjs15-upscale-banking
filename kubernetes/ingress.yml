@@ -3,28 +3,34 @@ kind: Ingress
 metadata:
   name: upscale-banking
   annotations:
-    # Use cert-manager to get SSL certificate from Let's Encrypt
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    
-    # Force HTTPS redirect
-    traefik.ingress.kubernetes.io/redirect-entry-point: https
-    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  # TLS/SSL configuration
-  tls: 
-    - hosts:
-        - upscalebanking.codewithxjohn.com
-      secretName: upscalebanking-tls  # Where cert-manager stores the certificate
-  
-  # Routing rules
+  ingressClassName: traefik
   rules:
-    - host: upscalebanking.codewithxjohn.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend: 
-              service:
-                name:  upscale-banking  # Must match service name
-                port: 
-                  number: 5000
+  - host: upscalebanking.codewithxjohn.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: upscale-banking
+            port:
+              number: 3000
+  - host: www.upscalebanking.codewithxjohn.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: upscale-banking
+            port:
+              number: 3000
+  tls:
+  - hosts:
+    - upscalebanking.codewithxjohn.com
+    - www.upscalebanking.codewithxjohn.com
+    secretName: upscale-banking-tls

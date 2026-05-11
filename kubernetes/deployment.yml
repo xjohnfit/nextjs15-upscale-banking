@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: upscale-banking
+  labels:
+    app: upscale-banking
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: upscale-banking
@@ -13,37 +15,133 @@ spec:
         app: upscale-banking
     spec:
       containers:
-        - name: upscalebanking
-          image: xjohnfit/upscale-banking:main
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: "1"
-              memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
-          ports:
-            - containerPort: 5000 # Next.js default port
-          envFrom:
-            - secretRef:
-                name: upscalebanking-secrets
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 5000
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
-            periodSeconds: 10
-            failureThreshold: 3
+      - name: app
+        image: xjohnfit/upscale-banking:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: HOSTNAME
+          value: "0.0.0.0"
 
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 5000
-            initialDelaySeconds: 15
-            timeoutSeconds: 5
-            periodSeconds: 5
-            failureThreshold: 3
-      imagePullSecrets:
-        - name: regcred
+        # NEXT (public)
+        - name: NEXT_PUBLIC_SITE_URL
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: NEXT_PUBLIC_SITE_URL
+
+        # APPWRITE
+        - name: NEXT_PUBLIC_APPWRITE_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: NEXT_PUBLIC_APPWRITE_ENDPOINT
+        - name: NEXT_PUBLIC_APPWRITE_PROJECT
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: NEXT_PUBLIC_APPWRITE_PROJECT
+        - name: APPWRITE_DATABASE_ID
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: APPWRITE_DATABASE_ID
+        - name: APPWRITE_USER_COLLECTION_ID
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: APPWRITE_USER_COLLECTION_ID
+        - name: APPWRITE_BANK_COLLECTION_ID
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: APPWRITE_BANK_COLLECTION_ID
+        - name: APPWRITE_TRANSACTION_COLLECTION_ID
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: APPWRITE_TRANSACTION_COLLECTION_ID
+        - name: NEXT_APPWRITE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: NEXT_APPWRITE_KEY
+        - name: APPWRITE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: APPWRITE_SECRET
+
+        # PLAID
+        - name: PLAID_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: PLAID_CLIENT_ID
+        - name: PLAID_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: PLAID_SECRET
+        - name: PLAID_ENV
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: PLAID_ENV
+        - name: PLAID_PRODUCTS
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: PLAID_PRODUCTS
+        - name: PLAID_COUNTRY_CODES
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: PLAID_COUNTRY_CODES
+
+        # DWOLLA
+        - name: DWOLLA_KEY
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: DWOLLA_KEY
+        - name: DWOLLA_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: DWOLLA_SECRET
+        - name: DWOLLA_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: DWOLLA_BASE_URL
+        - name: DWOLLA_ENV
+          valueFrom:
+            secretKeyRef:
+              name: upscale-banking-secrets
+              key: DWOLLA_ENV
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
