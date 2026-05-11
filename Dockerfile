@@ -45,7 +45,7 @@ USER nodejs
 EXPOSE 3000
 
 # Set environment to production
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 

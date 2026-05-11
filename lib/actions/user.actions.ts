@@ -30,6 +30,50 @@ const {
 
 const SESSION_COOKIE_NAME = 'appwrite-session';
 
+const normalizeCookieDomain = (domain: string | undefined) => {
+    if (!domain) {
+        return undefined;
+    }
+
+    let normalized = domain.trim().toLowerCase();
+
+    if (!normalized) {
+        return undefined;
+    }
+
+    try {
+        if (normalized.includes('://')) {
+            normalized = new URL(normalized).hostname.toLowerCase();
+        }
+    } catch {
+        return undefined;
+    }
+
+    if (normalized.includes('/')) {
+        normalized = normalized.split('/')[0];
+    }
+
+    if (normalized.includes(':')) {
+        normalized = normalized.split(':')[0];
+    }
+
+    if (normalized.startsWith('.')) {
+        normalized = normalized.slice(1);
+    }
+
+    const isIpAddress = /^\d+\.\d+\.\d+\.\d+$/.test(normalized);
+
+    if (!normalized || normalized === 'localhost' || isIpAddress) {
+        return undefined;
+    }
+
+    if (!normalized.includes('.')) {
+        return undefined;
+    }
+
+    return normalized;
+};
+
 const getLegacyCookieDomain = () => {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -69,7 +113,9 @@ const getSessionCookieOptions = () => {
         maxAge: 60 * 60 * 24 * 7,
     };
 
-    const configuredDomain = process.env.APP_COOKIE_DOMAIN?.trim();
+    const configuredDomain = normalizeCookieDomain(
+        process.env.APP_COOKIE_DOMAIN,
+    );
 
     if (configuredDomain && process.env.NODE_ENV === 'production') {
         return {
@@ -156,6 +202,9 @@ export const signIn = async ({ email, password }: signInProps) => {
         let user;
         try {
             user = await getUserInfo({ userId: session.userId });
+            if (!user) {
+                user = { userId: session.userId, email };
+            }
         } catch (userInfoError) {
             // Return a minimal user object so frontend knows signin worked
             user = { userId: session.userId, email };
@@ -292,6 +341,19 @@ export async function getLoggedInUser() {
         const result = await account.get();
 
         const user = await getUserInfo({ userId: result.$id });
+
+        if (!user) {
+            const [firstName = 'User', ...rest] =
+                (result.name ?? '').trim().split(/\s+/);
+
+            return parseStringify({
+                $id: result.$id,
+                userId: result.$id,
+                email: result.email,
+                firstName,
+                lastName: rest.join(' '),
+            });
+        }
 
         return parseStringify(user);
     } catch (error: any) {

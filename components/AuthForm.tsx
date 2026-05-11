@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,12 +21,7 @@ import { Input } from '@/components/ui/input';
 import CustomInput from './CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import {
-    signIn,
-    signUp,
-    clearInvalidSession,
-} from '@/lib/actions/user.actions';
+import { signIn, signUp } from '@/lib/actions/user.actions';
 import {
     forceRedirectAfterAuth,
     simpleRedirectAfterAuth,
@@ -35,21 +30,7 @@ import { toast } from 'sonner';
 import PlaygroundInfo from './PlaygroundInfo';
 
 const AuthForm = ({ type }: { type: string; }) => {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-
-    // Clear any invalid session on component mount
-    useEffect(() => {
-        const clearSession = async () => {
-            try {
-                await clearInvalidSession();
-            } catch (error) {
-                // No session to clear or error clearing session
-            }
-        };
-
-        clearSession();
-    }, []);
 
     const formSchema = authFormSchema(type);
 
