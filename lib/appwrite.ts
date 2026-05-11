@@ -40,8 +40,8 @@ export async function createSessionClient() {
 export async function createAdminClient() {
     const endpoint = requireEnvVar('NEXT_PUBLIC_APPWRITE_ENDPOINT');
     const project = requireEnvVar('NEXT_PUBLIC_APPWRITE_PROJECT');
-    const key =
-        process.env.APPWRITE_SECRET ?? requireEnvVar('NEXT_APPWRITE_KEY');
+    const appwriteSecret = process.env.APPWRITE_SECRET?.trim();
+    const key = appwriteSecret || requireEnvVar('NEXT_APPWRITE_KEY');
 
     const client = new Client()
         .setEndpoint(endpoint)

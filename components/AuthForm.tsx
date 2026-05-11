@@ -10,14 +10,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
     Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import CustomInput from './CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
@@ -34,7 +27,6 @@ const AuthForm = ({ type }: { type: string; }) => {
 
     const formSchema = authFormSchema(type);
 
-    // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -43,13 +35,10 @@ const AuthForm = ({ type }: { type: string; }) => {
         },
     });
 
-    // 2. Define a submit handler.
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
         try {
-            // Sign up with Appwrite & create plaid token
-
             if (type === 'sign-up') {
                 try {
                     const userData = {
@@ -72,17 +61,16 @@ const AuthForm = ({ type }: { type: string; }) => {
                             'Failed to create account. Please try again.'
                         );
                         return;
-                    } else {
-                        toast.success('Account created successfully!');
-
-                        // Try the robust redirect first, with simple fallback
-                        try {
-                            await forceRedirectAfterAuth();
-                        } catch (redirectError) {
-                            simpleRedirectAfterAuth();
-                        }
                     }
-                } catch (signUpError) {
+
+                    toast.success('Account created successfully!');
+
+                    try {
+                        await forceRedirectAfterAuth();
+                    } catch {
+                        simpleRedirectAfterAuth();
+                    }
+                } catch {
                     toast.error('Failed to create account. Please try again.');
                 }
             }
@@ -97,23 +85,22 @@ const AuthForm = ({ type }: { type: string; }) => {
                     if (response?.success) {
                         toast.success('Successfully signed in!');
 
-                        // Try the robust redirect first, with simple fallback
                         try {
                             await forceRedirectAfterAuth();
-                        } catch (redirectError) {
+                        } catch {
                             simpleRedirectAfterAuth();
                         }
                     } else {
                         toast.error(
                             response?.message ||
-                            'Sign in failed. Please try again.'
+                                'Sign in failed. Please try again.'
                         );
                     }
-                } catch (signInError) {
+                } catch {
                     toast.error('Sign in failed. Please try again.');
                 }
             }
-        } catch (error) {
+        } catch {
             if (type === 'sign-up') {
                 toast.error('Failed to create account. Please try again.');
             }
