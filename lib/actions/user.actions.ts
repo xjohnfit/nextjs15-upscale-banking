@@ -30,13 +30,51 @@ const {
 
 const SESSION_COOKIE_NAME = 'appwrite-session';
 
-const getSessionCookieOptions = () => ({
-    path: '/',
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 60 * 24 * 7,
-});
+const getCookieDomain = () => {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    if (!siteUrl) {
+        return undefined;
+    }
+
+    try {
+        const hostname = new URL(siteUrl).hostname.toLowerCase();
+        const isIpAddress = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+
+        if (
+            hostname === 'localhost' ||
+            isIpAddress ||
+            !hostname.includes('.')
+        ) {
+            return undefined;
+        }
+
+        return hostname;
+    } catch {
+        return undefined;
+    }
+};
+
+const getSessionCookieOptions = () => {
+    const options = {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+    };
+
+    const domain = getCookieDomain();
+
+    if (domain && process.env.NODE_ENV === 'production') {
+        return {
+            ...options,
+            domain,
+        };
+    }
+
+    return options;
+};
 
 const normalizeUserId = (value: unknown): string => {
     if (typeof value === 'string') return value;
@@ -100,6 +138,7 @@ export const signIn = async ({ email, password }: signInProps) => {
 
         return parseStringify(user);
     } catch (error: any) {
+        console.error('[auth] signIn failed:', error?.message || error);
         return null;
     }
 };
@@ -180,6 +219,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
         return parseStringify(newUser);
     } catch (error: any) {
+        console.error('[auth] signUp failed:', error?.message || error);
         return null;
     }
 };
