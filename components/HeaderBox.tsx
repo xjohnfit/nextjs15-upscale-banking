@@ -1,7 +1,7 @@
 const HeaderBox = ({ type = "title", title, subtext, user }: HeaderBoxProps) => {
   return (
     <div className="header-box">
-      <h1 className="header-box-title">
+      <h1 className="text-24 lg:text-30 font-semibold text-gray-900">
         {title}
         {type === 'greeting' && (
           <span className="text-bankGradient">
@@ -9,7 +9,7 @@ const HeaderBox = ({ type = "title", title, subtext, user }: HeaderBoxProps) => 
           </span>
         )}
       </h1>
-      <p className="header-box-subtext">{subtext}</p>
+      <p className="text-14 lg:text-16 font-normal text-gray-600">{subtext}</p>
     </div>
   )
 }

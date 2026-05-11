@@ -3,13 +3,19 @@
 import { Client, Account, Databases, Users } from 'node-appwrite';
 import { cookies } from 'next/headers';
 
-export async function createSessionClient() {
-    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
-    const project = process.env.NEXT_PUBLIC_APPWRITE_PROJECT;
+function requireEnvVar(name: string): string {
+    const value = process.env[name];
 
-    if (!endpoint || !project) {
-        throw new Error('Missing Appwrite configuration');
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${name}`);
     }
+
+    return value;
+}
+
+export async function createSessionClient() {
+    const endpoint = requireEnvVar('NEXT_PUBLIC_APPWRITE_ENDPOINT');
+    const project = requireEnvVar('NEXT_PUBLIC_APPWRITE_PROJECT');
 
     const client = new Client().setEndpoint(endpoint).setProject(project);
 
@@ -44,19 +50,23 @@ export async function createSessionClient() {
 }
 
 export async function createAdminClient() {
-    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
-    const project = process.env.NEXT_PUBLIC_APPWRITE_PROJECT;
-    const key = process.env.NEXT_APPWRITE_KEY;
-
-    if (!endpoint || !project || !key) {
-        throw new Error('Missing Appwrite admin configuration');
-    }
+    const endpoint = requireEnvVar('NEXT_PUBLIC_APPWRITE_ENDPOINT');
+    const project = requireEnvVar('NEXT_PUBLIC_APPWRITE_PROJECT');
+    const key =
+        process.env.APPWRITE_SECRET ?? requireEnvVar('NEXT_APPWRITE_KEY');
 
     const client = new Client()
         .setEndpoint(endpoint)
         .setProject(project)
-        .setSelfSigned(true) // <—— THIS IS CRUCIAL FOR HTTP CONNECTIONS/ REMOVE FOR HTTPS
         .setKey(key);
+
+    // Only allow self-signed certificates in local development when explicitly enabled.
+    if (
+        process.env.NODE_ENV !== 'production' &&
+        process.env.ALLOW_SELF_SIGNED_TLS === 'true'
+    ) {
+        client.setSelfSigned(true);
+    }
 
     return {
         get account() {

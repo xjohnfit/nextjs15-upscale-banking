@@ -12,69 +12,62 @@ const getEnvironment = (): 'production' | 'sandbox' => {
             return 'production';
         default:
             throw new Error(
-                'Dwolla environment should either be set to `sandbox` or `production`'
+                'Dwolla environment should either be set to `sandbox` or `production`',
             );
     }
 };
 
-// Validate Dwolla configuration
-const validateDwollaConfig = () => {
+const getDwollaConfig = () => {
     const key = process.env.DWOLLA_KEY;
     const secret = process.env.DWOLLA_SECRET;
 
-    if (!key || key === 'build-dummy-key') {
-        console.warn('Dwolla API key is missing or using dummy value');
-    }
-
-    if (!secret || secret === 'build-dummy-secret') {
-        console.warn('Dwolla API secret is missing or using dummy value');
+    if (!key || !secret) {
+        throw new Error(
+            'Missing Dwolla configuration. Set DWOLLA_KEY and DWOLLA_SECRET.',
+        );
     }
 
     return { key, secret };
 };
 
-const { key, secret } = validateDwollaConfig();
+const getDwollaClient = () => {
+    const { key, secret } = getDwollaConfig();
 
-const dwollaClient = new Client({
-    environment: getEnvironment(),
-    key: key || 'build-dummy-key',
-    secret: secret || 'build-dummy-secret',
-});
+    return new Client({
+        environment: getEnvironment(),
+        key,
+        secret,
+    });
+};
 
 // Create a Dwolla Funding Source using a Plaid Processor Token
 export const createFundingSource = async (
-    options: CreateFundingSourceOptions
+    options: CreateFundingSourceOptions,
 ) => {
     try {
+        const dwollaClient = getDwollaClient();
         const response = await dwollaClient.post(
             `customers/${options.customerId}/funding-sources`,
             {
                 name: options.fundingSourceName,
                 plaidToken: options.plaidToken,
-            }
+            },
         );
 
         return response.headers.get('location');
     } catch (err: any) {
         // Check if this is a duplicate resource error
         if (err.body && err.body.code === 'DuplicateResource') {
-            console.log('Bank already exists, using existing funding source:', {
-                customerId: options.customerId,
-                fundingSourceName: options.fundingSourceName,
-                existingFundingSourceUrl: err.body._links?.about?.href,
-            });
+            console.log('Bank already exists, using existing funding source.');
 
             // Return the existing funding source URL from the error response
             return err.body._links?.about?.href || null;
         }
 
         console.error('Dwolla createFundingSource error:', {
-            error: err,
-            message: err.message,
-            status: err.statusCode,
-            body: err.body,
-            customerId: options.customerId,
-            fundingSourceName: options.fundingSourceName,
+            message: err?.message,
+            status: err?.statusCode,
+            code: err?.body?.code,
         });
         return null;
     }
@@ -82,26 +75,27 @@ export const createFundingSource = async (
 
 export const createOnDemandAuthorization = async () => {
     try {
+        const dwollaClient = getDwollaClient();
         const onDemandAuthorization = await dwollaClient.post(
-            'on-demand-authorizations'
+            'on-demand-authorizations',
         );
         const authLink = onDemandAuthorization.body._links;
         return authLink;
     } catch (err: any) {
         console.error('createOnDemandAuthorization error:', {
-            error: err,
-            message: err.message,
-            status: err.statusCode,
-            body: err.body,
+            message: err?.message,
+            status: err?.statusCode,
+            code: err?.body?.code,
         });
         return null;
     }
 };
 
 export const createDwollaCustomer = async (
-    newCustomer: NewDwollaCustomerParams
+    newCustomer: NewDwollaCustomerParams,
 ) => {
     try {
+        const dwollaClient = getDwollaClient();
         return await dwollaClient
             .post('customers', newCustomer)
             .then((res) => res.headers.get('location'));
@@ -116,6 +110,7 @@ export const createTransfer = async ({
     amount,
 }: TransferParams) => {
     try {
+        const dwollaClient = getDwollaClient();
         const requestBody = {
             _links: {
                 source: {
@@ -173,10 +168,7 @@ export const addFundingSource = async ({
         return await createFundingSource(fundingSourceOptions);
     } catch (err: any) {
         console.error('addFundingSource error:', {
-            error: err,
-            message: err.message,
-            dwollaCustomerId,
-            bankName,
+            message: err?.message,
         });
         return null;
     }

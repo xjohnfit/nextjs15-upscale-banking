@@ -1,32 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { logoutAccount } from '@/lib/actions/user.actions';
+import { isSameOrigin, jsonNoStore, SESSION_COOKIE_NAME } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
+    if (!isSameOrigin(request)) {
+        return jsonNoStore(
+            { success: false, message: 'Forbidden origin' },
+            403,
+        );
+    }
+
     try {
-        // Call the logout function to clear Appwrite session
         await logoutAccount();
 
-        // Also manually clear the cookie to be sure
         const cookieStore = await cookies();
-        cookieStore.delete('appwrite-session');
+        cookieStore.delete(SESSION_COOKIE_NAME);
 
-        return NextResponse.json(
+        return jsonNoStore(
             { success: true, message: 'Logged out successfully' },
-            { status: 200 }
+            200,
         );
     } catch (error: any) {
-        // Even if logout fails, clear the cookie
         try {
             const cookieStore = await cookies();
-            cookieStore.delete('appwrite-session');
+            cookieStore.delete(SESSION_COOKIE_NAME);
         } catch (cookieError) {
-            // Failed to clear cookie
+            console.error('Unable to clear session cookie during logout');
         }
 
-        return NextResponse.json(
-            { success: true, message: 'Session cleared' },
-            { status: 200 }
-        );
+        return jsonNoStore({ success: true, message: 'Session cleared' }, 200);
     }
 }

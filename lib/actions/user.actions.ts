@@ -3,7 +3,12 @@
 import { ID, Query } from 'node-appwrite';
 import { createAdminClient, createSessionClient } from '../appwrite';
 import { cookies } from 'next/headers';
-import { encryptId, extractCustomerIdFromUrl, parseStringify } from '../utils';
+import {
+    decryptId,
+    encryptId,
+    extractCustomerIdFromUrl,
+    parseStringify,
+} from '../utils';
 import {
     CountryCode,
     ProcessorTokenCreateRequest,
@@ -14,12 +19,39 @@ import {
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from 'next/cache';
 import { addFundingSource, createDwollaCustomer } from './dwolla.actions';
+import { createTransfer } from './dwolla.actions';
+import { createTransaction } from './transaction.actions';
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,
     APPWRITE_USER_COLLECTION_ID: USER_COLLECTION_ID,
     APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
 } = process.env;
+
+const SESSION_COOKIE_NAME = 'appwrite-session';
+
+const getSessionCookieOptions = () => ({
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7,
+});
+
+const normalizeUserId = (value: unknown): string => {
+    if (typeof value === 'string') return value;
+
+    if (
+        value &&
+        typeof value === 'object' &&
+        '$id' in value &&
+        typeof (value as { $id?: unknown }).$id === 'string'
+    ) {
+        return (value as { $id: string }).$id;
+    }
+
+    return '';
+};
 
 export const getUserInfo = async ({ userId }: getUserInfoProps) => {
     try {
@@ -28,7 +60,7 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
         const user = await database.listDocuments(
             DATABASE_ID!,
             USER_COLLECTION_ID!,
-            [Query.equal('userId', [userId])]
+            [Query.equal('userId', [userId])],
         );
 
         if (user.documents.length === 0) {
@@ -47,24 +79,15 @@ export const signIn = async ({ email, password }: signInProps) => {
 
         const session = await account.createEmailPasswordSession(
             email,
-            password
+            password,
         );
 
         const cookieStore = await cookies();
-
-        // Set the session cookie
-        const isSecureConnection =
-            process.env.FORCE_SECURE_COOKIES === 'true' || false; // Force false for HTTP production
-
-        const cookieOptions = {
-            path: '/',
-            httpOnly: true,
-            sameSite: 'lax' as const,
-            secure: isSecureConnection,
-            maxAge: 60 * 60 * 24 * 30, // 30 days
-        };
-
-        cookieStore.set('appwrite-session', session.secret, cookieOptions);
+        cookieStore.set(
+            SESSION_COOKIE_NAME,
+            session.secret,
+            getSessionCookieOptions(),
+        );
 
         // Try to get user info, but don't fail signin if it doesn't work
         let user;
@@ -94,7 +117,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
             ID.unique(),
             email,
             password,
-            `${firstName} ${lastName}`
+            `${firstName} ${lastName}`,
         );
 
         if (!newUserAccount) throw new Error('Error creating user');
@@ -132,30 +155,28 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
                 DATABASE_ID!,
                 USER_COLLECTION_ID!,
                 ID.unique(),
-                userDocData
+                userDocData,
             );
         } catch (dbError: any) {
             throw new Error(
                 `Database document creation failed: ${
                     dbError?.message || 'Unknown error'
-                }`
+                }`,
             );
         }
 
         // Create session
         const session = await account.createEmailPasswordSession(
             email,
-            password
+            password,
         );
 
         const cookieStore = await cookies();
-        cookieStore.set('appwrite-session', session.secret, {
-            path: '/',
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: false,
-            maxAge: 60 * 60 * 24 * 30, // 30 days
-        });
+        cookieStore.set(
+            SESSION_COOKIE_NAME,
+            session.secret,
+            getSessionCookieOptions(),
+        );
 
         return parseStringify(newUser);
     } catch (error: any) {
@@ -167,7 +188,7 @@ export async function getLoggedInUser() {
     try {
         // First check if we have a session cookie
         const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('appwrite-session');
+        const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
 
         if (!sessionCookie || !sessionCookie.value) {
             return null;
@@ -187,13 +208,17 @@ export async function getLoggedInUser() {
             (error.message?.includes('session') ||
                 error.message?.includes('Invalid session') ||
                 error.message?.includes(
-                    'User (role: guests) missing scope (account)'
+                    'User (role: guests) missing scope (account)',
                 ) ||
                 error.message?.includes('Unauthorized') ||
                 error.type === 'user_unauthorized' ||
                 error.type === 'user_invalid_token' ||
                 error.type === 'general_unauthorized_scope' ||
                 error.code === 401);
+
+        if (shouldClearSession) {
+            (await cookies()).delete(SESSION_COOKIE_NAME);
+        }
 
         return null;
     }
@@ -203,7 +228,7 @@ export const logoutAccount = async () => {
     try {
         const { account } = await createSessionClient();
 
-        (await cookies()).delete('appwrite-session');
+        (await cookies()).delete(SESSION_COOKIE_NAME);
 
         await account.deleteSession('current');
     } catch (error) {
@@ -254,7 +279,7 @@ export const createBankAccount = async ({
                 accessToken,
                 fundingSourceUrl,
                 shareableId,
-            }
+            },
         );
 
         return parseStringify(bankAccount);
@@ -290,9 +315,8 @@ export const exchangePublicToken = async ({
             processor: 'dwolla' as ProcessorTokenCreateRequestProcessorEnum,
         };
 
-        const processorTokenResponse = await plaidClient.processorTokenCreate(
-            request
-        );
+        const processorTokenResponse =
+            await plaidClient.processorTokenCreate(request);
         const processorToken = processorTokenResponse.data.processor_token;
 
         // Check if this bank account already exists for this user
@@ -333,7 +357,7 @@ export const exchangePublicToken = async ({
                 processorTokenExists: !!processorToken,
             });
             throw new Error(
-                'Failed to create funding source URL. Please check Dwolla configuration and ensure your account is properly set up.'
+                'Failed to create funding source URL. Please check Dwolla configuration and ensure your account is properly set up.',
             );
         }
 
@@ -366,7 +390,7 @@ export const getBanks = async ({ userId }: getBanksProps) => {
         const banks = await database.listDocuments(
             DATABASE_ID!,
             BANK_COLLECTION_ID!,
-            [Query.equal('userId', [userId])]
+            [Query.equal('userId', [userId])],
         );
 
         return parseStringify(banks.documents);
@@ -383,7 +407,7 @@ export const getBank = async ({ documentId }: getBankProps) => {
         const bank = await database.getDocument(
             DATABASE_ID!,
             BANK_COLLECTION_ID!,
-            documentId
+            documentId,
         );
 
         return parseStringify(bank);
@@ -401,7 +425,7 @@ export const getBankByAccountId = async ({
         const bank = await database.listDocuments(
             DATABASE_ID!,
             BANK_COLLECTION_ID!,
-            [Query.equal('accountId', [accountId])]
+            [Query.equal('accountId', [accountId])],
         );
 
         if (bank.total !== 1) return null;
@@ -417,12 +441,113 @@ export const clearInvalidSession = async () => {
 
     try {
         const cookieStore = await cookies();
-        cookieStore.delete('appwrite-session');
+        cookieStore.delete(SESSION_COOKIE_NAME);
         return { success: true };
     } catch (error) {
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
         };
+    }
+};
+
+export const initiateTransfer = async ({
+    senderBankDocumentId,
+    receiverShareableId,
+    amount,
+    email,
+    name,
+}: InitiateTransferParams) => {
+    try {
+        const loggedInUser = await getLoggedInUser();
+
+        if (!loggedInUser?.$id) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        const trimmedNote = name.trim();
+        const trimmedEmail = email.trim().toLowerCase();
+        const normalizedAmount = Number(amount);
+
+        if (
+            !Number.isFinite(normalizedAmount) ||
+            normalizedAmount <= 0 ||
+            normalizedAmount > 10000
+        ) {
+            return { success: false, error: 'Invalid transfer amount' };
+        }
+
+        const senderBank = await getBank({ documentId: senderBankDocumentId });
+
+        if (!senderBank) {
+            return { success: false, error: 'Source bank account not found' };
+        }
+
+        const senderOwnerId = normalizeUserId(senderBank.userId);
+        if (senderOwnerId !== loggedInUser.$id) {
+            return {
+                success: false,
+                error: 'Not authorized for this bank account',
+            };
+        }
+
+        const receiverAccountId = decryptId(receiverShareableId);
+        const receiverBank = await getBankByAccountId({
+            accountId: receiverAccountId,
+        });
+
+        if (!receiverBank) {
+            return {
+                success: false,
+                error: 'Destination bank account not found',
+            };
+        }
+
+        if (!senderBank.fundingSourceUrl || !receiverBank.fundingSourceUrl) {
+            return {
+                success: false,
+                error: 'Bank account is not ready for transfers',
+            };
+        }
+
+        const transferResult = await createTransfer({
+            sourceFundingSourceUrl: senderBank.fundingSourceUrl,
+            destinationFundingSourceUrl: receiverBank.fundingSourceUrl,
+            amount: normalizedAmount.toFixed(2),
+        });
+
+        if (!transferResult) {
+            return {
+                success: false,
+                error: 'Transfer provider rejected the request',
+            };
+        }
+
+        const receiverId = normalizeUserId(receiverBank.userId);
+
+        const transaction = await createTransaction({
+            name: trimmedNote,
+            amount: normalizedAmount.toFixed(2),
+            senderId: loggedInUser.$id,
+            senderBankId: senderBank.$id,
+            receiverId,
+            receiverBankId: receiverBank.$id,
+            email: trimmedEmail,
+        });
+
+        if (!transaction) {
+            return {
+                success: false,
+                error: 'Transfer completed but transaction recording failed',
+            };
+        }
+
+        revalidatePath('/');
+        revalidatePath('/payment-transfer');
+        revalidatePath('/transaction-history');
+
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: 'Unable to process transfer request' };
     }
 };

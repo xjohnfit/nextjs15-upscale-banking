@@ -137,9 +137,7 @@ const Home = async (props: SearchParamProps) => {
                             <TotalBalanceBox
                                 accounts={accountsData}
                                 totalBanks={accounts?.totalBanks}
-                                totalCurrentBalance={
-                                    accounts?.totalCurrentBalance
-                                }
+                                totalCurrentBalance={accounts?.totalCurrentBalance}
                             />
 
                             {/* Add prominent PlaidLink section for users with no connected accounts */}

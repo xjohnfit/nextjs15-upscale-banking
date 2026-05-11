@@ -7,10 +7,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { createTransfer } from '@/lib/actions/dwolla.actions';
-import { createTransaction } from '@/lib/actions/transaction.actions';
-import { getBank, getBankByAccountId } from '@/lib/actions/user.actions';
-import { decryptId } from '@/lib/utils';
+import { initiateTransfer } from '@/lib/actions/user.actions';
+import { toast } from 'sonner';
 
 import { BankDropdown } from './BankDropdown';
 import { Button } from './ui/button';
@@ -28,8 +26,10 @@ import { Textarea } from './ui/textarea';
 
 const formSchema = z.object({
     email: z.string().email('Invalid email address'),
-    name: z.string().min(4, 'Transfer note is too short'),
-    amount: z.string().min(4, 'Amount is too short'),
+    name: z.string().min(4, 'Transfer note is too short').max(120),
+    amount: z
+        .string()
+        .regex(/^\d+(\.\d{1,2})?$/, 'Use a valid amount (e.g. 5.00)'),
     senderBank: z.string().min(4, 'Please select a valid bank account'),
     sharableId: z.string().min(8, 'Please select a valid sharable Id'),
 });
@@ -53,41 +53,24 @@ const PaymentTransferForm = ({ accounts }: PaymentTransferFormProps) => {
         setIsLoading(true);
 
         try {
-            const receiverAccountId = decryptId(data.sharableId);
-            const receiverBank = await getBankByAccountId({
-                accountId: receiverAccountId,
-            });
-            const senderBank = await getBank({ documentId: data.senderBank });
-
-            const transferParams = {
-                sourceFundingSourceUrl: senderBank.fundingSourceUrl,
-                destinationFundingSourceUrl: receiverBank.fundingSourceUrl,
+            const result = await initiateTransfer({
+                senderBankDocumentId: data.senderBank,
+                receiverShareableId: data.sharableId,
                 amount: data.amount,
-            };
-            // create transfer
-            const transfer = await createTransfer(transferParams);
+                email: data.email,
+                name: data.name,
+            });
 
-            // create transfer transaction
-            if (transfer) {
-                const transaction = {
-                    name: data.name,
-                    amount: data.amount,
-                    senderId: senderBank.userId.$id,
-                    senderBankId: senderBank.$id,
-                    receiverId: receiverBank.userId.$id,
-                    receiverBankId: receiverBank.$id,
-                    email: data.email,
-                };
-
-                const newTransaction = await createTransaction(transaction);
-
-                if (newTransaction) {
-                    form.reset();
-                    router.push('/');
-                }
+            if (!result.success) {
+                toast.error(result.error || 'Transfer failed. Please try again.');
+                return;
             }
+
+            toast.success('Transfer submitted successfully.');
+            form.reset();
+            router.push('/');
         } catch (error) {
-            // Transfer failed
+            toast.error('Transfer failed. Please try again.');
         }
 
         setIsLoading(false);

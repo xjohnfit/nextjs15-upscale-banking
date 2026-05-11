@@ -13,7 +13,22 @@ import { plaidClient } from '../plaid';
 import { parseStringify } from '../utils';
 
 import { getTransactionsByBankId } from './transaction.actions';
-import { getBanks, getBank } from './user.actions';
+import { getBanks, getBank, getLoggedInUser } from './user.actions';
+
+const getOwnerId = (value: unknown): string => {
+    if (typeof value === 'string') return value;
+
+    if (
+        value &&
+        typeof value === 'object' &&
+        '$id' in value &&
+        typeof (value as { $id?: unknown }).$id === 'string'
+    ) {
+        return (value as { $id: string }).$id;
+    }
+
+    return '';
+};
 
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
@@ -49,7 +64,7 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
                 };
 
                 return account;
-            })
+            }),
         );
 
         const totalBanks = accounts.length;
@@ -70,10 +85,20 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 // Get one bank account
 export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     try {
+        const loggedInUser = await getLoggedInUser();
+
+        if (!loggedInUser?.$id) {
+            return null;
+        }
+
         // get bank from db
         const bank = await getBank({ documentId: appwriteItemId });
 
         if (!bank) {
+            return null;
+        }
+
+        if (getOwnerId(bank.userId) !== loggedInUser.$id) {
             return null;
         }
 
@@ -102,7 +127,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
                 category: transferData.category,
                 type:
                     transferData.senderBankId === bank.$id ? 'debit' : 'credit',
-            })
+            }),
         );
 
         // get institution info from plaid
@@ -129,7 +154,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
 
         // sort transactions by date such that the most recent transaction is first
         const allTransactions = [...transactions, ...transferTransactions].sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
         );
 
         return parseStringify({

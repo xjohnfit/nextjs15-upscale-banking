@@ -31,10 +31,6 @@ export default function SessionHandler({
                 credentials: 'include',
             });
 
-            // Clear any local storage
-            localStorage.clear();
-            sessionStorage.clear();
-
             // Force page reload to clear any cached state
             window.location.href = '/sign-in';
         } catch (error) {

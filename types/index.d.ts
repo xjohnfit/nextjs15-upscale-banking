@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 
 declare type SearchParamProps = {
-    params: { [key: string]: string };
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{ [key: string]: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // ========================================
@@ -317,6 +317,14 @@ declare interface getBanksProps {
 
 declare interface getBankProps {
     documentId: string;
+}
+
+declare interface InitiateTransferParams {
+    senderBankDocumentId: string;
+    receiverShareableId: string;
+    amount: string;
+    email: string;
+    name: string;
 }
 
 declare interface getBankByAccountIdProps {
