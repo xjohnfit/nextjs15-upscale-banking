@@ -16,8 +16,6 @@ export function validateEnvVars() {
         'APPWRITE_USER_COLLECTION_ID',
         'APPWRITE_BANK_COLLECTION_ID',
         'APPWRITE_TRANSACTION_COLLECTION_ID',
-        'NEXT_APPWRITE_KEY',
-        'APPWRITE_SECRET',
         'PLAID_CLIENT_ID',
         'PLAID_SECRET',
         'PLAID_ENV',
@@ -32,6 +30,11 @@ export function validateEnvVars() {
     const missingVars = requiredEnvVars.filter(
         (varName) => !process.env[varName],
     );
+
+    const hasAppwriteSecret = Boolean(process.env.APPWRITE_SECRET);
+    const hasLegacyAppwriteKey = Boolean(process.env.NEXT_APPWRITE_KEY);
+    const missingAppwriteAdminCredential =
+        !hasAppwriteSecret && !hasLegacyAppwriteKey;
 
     const plaidEnv = process.env.PLAID_ENV ?? 'sandbox';
     const dwollaEnv = process.env.DWOLLA_ENV ?? 'sandbox';
@@ -52,6 +55,12 @@ export function validateEnvVars() {
     if (missingVars.length > 0) {
         validationErrors.push(
             `Missing required environment variables: ${missingVars.join(', ')}`,
+        );
+    }
+
+    if (missingAppwriteAdminCredential) {
+        validationErrors.push(
+            'Missing Appwrite admin credential: set APPWRITE_SECRET or NEXT_APPWRITE_KEY.',
         );
     }
 
