@@ -93,7 +93,7 @@ const AuthForm = ({ type }: { type: string; }) => {
                     } else {
                         toast.error(
                             response?.message ||
-                                'Sign in failed. Please try again.'
+                            'Sign in failed. Please try again.'
                         );
                     }
                 } catch {
