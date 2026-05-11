@@ -1,17 +1,32 @@
 // lib/env-validation.ts
+
 export function validateEnvVars() {
+    // All environment variables are required only at runtime (never at build time)
+    // They are injected by Kubernetes, not Docker
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+        // Build phase: skip all validation
+        return;
+    }
+
     const requiredEnvVars = [
+        'NEXT_PUBLIC_SITE_URL',
         'NEXT_PUBLIC_APPWRITE_ENDPOINT',
         'NEXT_PUBLIC_APPWRITE_PROJECT',
         'APPWRITE_DATABASE_ID',
         'APPWRITE_USER_COLLECTION_ID',
         'APPWRITE_BANK_COLLECTION_ID',
         'APPWRITE_TRANSACTION_COLLECTION_ID',
+        'NEXT_APPWRITE_KEY',
         'APPWRITE_SECRET',
         'PLAID_CLIENT_ID',
         'PLAID_SECRET',
+        'PLAID_ENV',
+        'PLAID_PRODUCTS',
+        'PLAID_COUNTRY_CODES',
         'DWOLLA_KEY',
         'DWOLLA_SECRET',
+        'DWOLLA_BASE_URL',
+        'DWOLLA_ENV',
     ];
 
     const missingVars = requiredEnvVars.filter(
