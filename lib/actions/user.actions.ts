@@ -49,6 +49,11 @@ const getCookieDomain = () => {
             return undefined;
         }
 
+        // Support both apex and www hosts in production deployments.
+        if (hostname.startsWith('www.')) {
+            return hostname.slice(4);
+        }
+
         return hostname;
     } catch {
         return undefined;
@@ -136,10 +141,37 @@ export const signIn = async ({ email, password }: signInProps) => {
             user = { userId: session.userId, email };
         }
 
-        return parseStringify(user);
+        return parseStringify({
+            success: true,
+            user,
+        });
     } catch (error: any) {
-        console.error('[auth] signIn failed:', error?.message || error);
-        return null;
+        const code = typeof error?.code === 'number' ? error.code : undefined;
+        const type =
+            typeof error?.type === 'string' ? error.type : 'unknown_error';
+        const message =
+            typeof error?.message === 'string'
+                ? error.message
+                : 'Unable to sign in at this time.';
+
+        console.error('[auth] signIn failed:', {
+            code,
+            type,
+            message,
+        });
+
+        const isCredentialError =
+            code === 401 ||
+            type === 'user_invalid_credentials' ||
+            message.toLowerCase().includes('invalid credentials');
+
+        return parseStringify({
+            success: false,
+            errorCode: type,
+            message: isCredentialError
+                ? 'Invalid email or password. Please try again.'
+                : 'Sign in is temporarily unavailable. Please try again shortly.',
+        });
     }
 };
 
@@ -255,9 +287,10 @@ export async function getLoggedInUser() {
                 error.type === 'user_invalid_token' ||
                 error.type === 'general_unauthorized_scope' ||
                 error.code === 401);
-
         if (shouldClearSession) {
-            (await cookies()).delete(SESSION_COOKIE_NAME);
+            // getLoggedInUser can run during Server Component rendering,
+            // where cookie mutation is not allowed.
+            return null;
         }
 
         return null;

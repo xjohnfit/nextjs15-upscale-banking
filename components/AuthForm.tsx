@@ -34,7 +34,7 @@ import {
 import { toast } from 'sonner';
 import PlaygroundInfo from './PlaygroundInfo';
 
-const AuthForm = ({ type }: { type: string }) => {
+const AuthForm = ({ type }: { type: string; }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -113,7 +113,7 @@ const AuthForm = ({ type }: { type: string }) => {
                         password: data.password,
                     });
 
-                    if (response) {
+                    if (response?.success) {
                         toast.success('Successfully signed in!');
 
                         // Try the robust redirect first, with simple fallback
@@ -124,7 +124,8 @@ const AuthForm = ({ type }: { type: string }) => {
                         }
                     } else {
                         toast.error(
-                            'Invalid email or password. Please try again.'
+                            response?.message ||
+                            'Sign in failed. Please try again.'
                         );
                     }
                 } catch (signInError) {

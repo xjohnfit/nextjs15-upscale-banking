@@ -25,28 +25,16 @@ export async function createSessionClient() {
         throw new Error('No session');
     }
 
-    try {
-        client.setSession(session.value);
+    client.setSession(session.value);
 
-        // Test the session by creating an account instance and trying to verify it
-        const account = new Account(client);
+    // Keep this helper read-only because it can be called during render.
+    const account = new Account(client);
 
-        return {
-            get account() {
-                return account;
-            },
-        };
-    } catch (error: any) {
-        // Clear invalid session cookie
-        try {
-            const cookieStore = await cookies();
-            cookieStore.delete('appwrite-session');
-        } catch (clearError) {
-            // Failed to clear session cookie
-        }
-
-        throw error;
-    }
+    return {
+        get account() {
+            return account;
+        },
+    };
 }
 
 export async function createAdminClient() {
