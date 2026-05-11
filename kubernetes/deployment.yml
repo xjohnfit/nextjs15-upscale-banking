@@ -139,9 +139,20 @@ spec:
             port: 3000
           initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /api/health
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 30
