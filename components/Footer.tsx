@@ -12,34 +12,37 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
         router.push('/sign-in');
     };
 
+    const isMobile = type === 'mobile';
+
     return (
-        <footer className='footer'>
-            <div className={type === 'mobile' ? 'footer_name-mobile' : 'footer_name'}>
-                <p className='text-xl font-bold text-white'>
+        <div className={isMobile ? 'footer-mobile' : 'footer-desktop'}>
+            <div className={isMobile ? 'footer_name-mobile' : 'footer_name'}>
+                <p className='text-sm font-bold text-white leading-none'>
                     {user?.firstName[0]}
                 </p>
             </div>
 
-            <div className={type === 'mobile' ? 'footer_email-mobile' : 'footer_email'}>
-                <h1 className='text-14 truncate text-black-1 font-semibold'>
+            <div className={isMobile ? 'footer_email-mobile' : 'footer_email'}>
+                <p className='text-sm font-semibold text-gray-800 truncate'>
                     {user?.firstName}
-                </h1>
-                <p className='text-14 truncate font-normal text-gray-600'>
+                </p>
+                <p className='text-xs text-gray-500 truncate'>
                     {user?.email}
                 </p>
             </div>
 
             <button
                 onClick={handleLogOut}
-                className='footer_image'
+                className='footer_logout'
                 aria-label='Log out'>
                 <Image
                     src='/icons/logout.svg'
-                    fill
+                    width={18}
+                    height={18}
                     alt='Log out'
                 />
             </button>
-        </footer>
+        </div>
     );
 };
 
