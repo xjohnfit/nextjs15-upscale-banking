@@ -82,16 +82,13 @@ jobs:
         chmod 600 $HOME/.kube/config
     
     - name: Set image tag
-      id: image-tag
+      id: image-tags
       run: |
         echo "IMAGE_TAG=main-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-    
+
     - name: Create or update Kubernetes secrets
       run: |
-        # Delete existing secret if it exists (ignore errors if it doesn't)
         kubectl delete secret upscale-banking-secrets --ignore-not-found=true
-        
-        # Create new secret from GitHub Actions secrets
         kubectl create secret generic upscale-banking-secrets \
           --from-literal=NEXT_PUBLIC_SITE_URL="${{ secrets.NEXT_PUBLIC_SITE_URL }}" \
           --from-literal=NEXT_PUBLIC_APPWRITE_ENDPOINT="${{ secrets.NEXT_PUBLIC_APPWRITE_ENDPOINT }}" \
@@ -111,19 +108,21 @@ jobs:
           --from-literal=DWOLLA_SECRET="${{ secrets.DWOLLA_SECRET }}" \
           --from-literal=DWOLLA_BASE_URL="${{ secrets.DWOLLA_BASE_URL }}" \
           --from-literal=DWOLLA_ENV="${{ secrets.DWOLLA_ENV }}"
-    
+
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f kubernetes/cluster-issuer-staging.yml
-        kubectl apply -f kubernetes/cluster-issuer-prod.yml
-        kubectl apply -f kubernetes/deployment.yml
-        kubectl apply -f kubernetes/service.yml
-        kubectl apply -f kubernetes/ingress.yml
-    
+        kubectl apply --validate=false -f kubernetes/cluster-issuer-staging.yml
+        kubectl apply --validate=false -f kubernetes/cluster-issuer-prod.yml
+        kubectl apply --validate=false -f kubernetes/deployment.yml
+        kubectl apply --validate=false -f kubernetes/service.yml
+        kubectl apply --validate=false -f kubernetes/ingress.yml
+
     - name: Update deployment with new image tag
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        IMAGE_TAG: ${{ steps.image-tags.outputs.IMAGE_TAG }}
       run: |
-        # The container name 'app' must match the name in kubernetes/deployment.yml
-        kubectl set image deployment/upscale-banking app=${{ secrets.DOCKERHUB_USERNAME }}/upscale-banking:${{ steps.image-tag.outputs.IMAGE_TAG }}
+        kubectl set image deployment/upscale-banking app=$DOCKERHUB_USERNAME/upscale-banking:$IMAGE_TAG
     
     - name: Wait for rollout to complete
       run: |
