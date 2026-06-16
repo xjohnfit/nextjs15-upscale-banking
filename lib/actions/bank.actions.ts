@@ -38,7 +38,7 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
         // get banks from db
         const banks = await getBanks({ userId });
 
-        const accounts = await Promise.all(
+        const results = await Promise.allSettled(
             banks?.map(async (bank: Bank) => {
                 // get each account info from plaid
                 const accountsResponse = await plaidClient.accountsGet({
@@ -47,15 +47,16 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
                 const accountData = accountsResponse.data.accounts[0];
 
                 // get institution info from plaid
-                const institution = await getInstitution({
-                    institutionId: accountsResponse.data.item.institution_id!,
-                });
+                const rawInstitutionId = accountsResponse.data.item.institution_id;
+                const institution = rawInstitutionId
+                    ? await getInstitution({ institutionId: rawInstitutionId })
+                    : null;
 
                 const account = {
                     id: accountData.account_id,
                     availableBalance: accountData.balances.available!,
                     currentBalance: accountData.balances.current!,
-                    institutionId: institution.institution_id,
+                    institutionId: institution?.institution_id ?? rawInstitutionId ?? '',
                     name: accountData.name,
                     officialName: accountData.official_name,
                     mask: accountData.mask!,
@@ -68,6 +69,10 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
                 return account;
             }),
         );
+
+        const accounts = results
+            .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled')
+            .map((r) => r.value);
 
         const totalBanks = accounts.length;
         const totalCurrentBalance = accounts.reduce((total, account) => {
@@ -135,9 +140,10 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
         );
 
         // get institution info from plaid
-        const institution = await getInstitution({
-            institutionId: accountsResponse.data.item.institution_id!,
-        });
+        const rawInstitutionId2 = accountsResponse.data.item.institution_id;
+        const institution = rawInstitutionId2
+            ? await getInstitution({ institutionId: rawInstitutionId2 })
+            : null;
 
         const transactions = await getTransactions({
             accessToken: bank?.accessToken,
@@ -147,7 +153,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
             id: accountData.account_id,
             availableBalance: accountData.balances.available!,
             currentBalance: accountData.balances.current!,
-            institutionId: institution.institution_id,
+            institutionId: institution?.institution_id ?? rawInstitutionId2 ?? '',
             name: accountData.name,
             officialName: accountData.official_name,
             mask: accountData.mask!,

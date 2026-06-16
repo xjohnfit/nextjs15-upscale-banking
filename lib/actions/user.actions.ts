@@ -454,7 +454,7 @@ export const exchangePublicToken = async ({
     try {
         const plaidClient = createPlaidClient();
 
-        // Exchange public token for access token and item ID
+        console.log('[exchangePublicToken] step 1: exchanging public token');
         const response = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,
         });
@@ -462,14 +462,15 @@ export const exchangePublicToken = async ({
         const accessToken = response.data.access_token;
         const itemId = response.data.item_id;
 
-        // Get account information from Plaid using the access token
+        console.log('[exchangePublicToken] step 2: fetching accounts');
         const accountsResponse = await plaidClient.accountsGet({
             access_token: accessToken,
         });
 
         const accountData = accountsResponse.data.accounts[0];
+        console.log('[exchangePublicToken] account:', accountData?.name, accountData?.account_id);
 
-        // Create a processor token for Dwolla using the access token and account ID
+        console.log('[exchangePublicToken] step 3: creating processor token');
         const request: ProcessorTokenCreateRequest = {
             access_token: accessToken,
             account_id: accountData.account_id,
@@ -479,51 +480,39 @@ export const exchangePublicToken = async ({
         const processorTokenResponse =
             await plaidClient.processorTokenCreate(request);
         const processorToken = processorTokenResponse.data.processor_token;
+        console.log('[exchangePublicToken] processor token created:', !!processorToken);
 
-        // Check if this bank account already exists for this user
         const existingBank = await getBankByAccountId({
             accountId: accountData.account_id,
         });
 
         if (existingBank && existingBank.userId === user.$id) {
-            console.log('Bank account already exists for user:', {
-                userId: user.$id,
-                accountId: accountData.account_id,
-                bankName: accountData.name,
-                existingBankId: existingBank.$id,
-            });
-
-            // Revalidate the path to reflect any changes
+            console.log('[exchangePublicToken] bank already linked for user');
             revalidatePath('/');
-
-            // Return success since the bank is already connected
             return parseStringify({
                 publicTokenExchange: 'complete',
                 message: 'Bank account already connected',
             });
         }
 
-        // Create a funding source URL for the account using the Dwolla customer ID, processor token, and bank name
+        console.log('[exchangePublicToken] step 4: creating Dwolla funding source', {
+            dwollaCustomerId: user.dwollaCustomerId,
+            hasDwollaId: !!user.dwollaCustomerId,
+        });
         const fundingSourceUrl = await addFundingSource({
             dwollaCustomerId: user.dwollaCustomerId,
             processorToken,
             bankName: accountData.name,
         });
 
-        // If the funding source URL is not created, provide more detailed error information
         if (!fundingSourceUrl) {
-            console.error('Failed to create funding source URL:', {
-                dwollaCustomerId: user.dwollaCustomerId,
-                bankName: accountData.name,
-                processorTokenExists: !!processorToken,
-            });
-            throw new Error(
-                'Failed to create funding source URL. Please check Dwolla configuration and ensure your account is properly set up.',
-            );
+            const msg = `Failed to create Dwolla funding source. dwollaCustomerId=${user.dwollaCustomerId ?? 'MISSING'}`;
+            console.error('[exchangePublicToken]', msg);
+            throw new Error(msg);
         }
 
-        // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
-        await createBankAccount({
+        console.log('[exchangePublicToken] step 5: saving bank to Appwrite');
+        const savedBank = await createBankAccount({
             userId: user.$id,
             bankId: itemId,
             accountId: accountData.account_id,
@@ -532,15 +521,19 @@ export const exchangePublicToken = async ({
             shareableId: encryptId(accountData.account_id),
         });
 
-        // Revalidate the path to reflect the changes
+        if (!savedBank) {
+            throw new Error('Failed to save bank account to database. The Appwrite document could not be created.');
+        }
+
         revalidatePath('/');
 
-        // Return a success message
+        console.log('[exchangePublicToken] complete');
         return parseStringify({
             publicTokenExchange: 'complete',
         });
-    } catch (error) {
-        throw error; // Re-throw so PlaidLink can handle it
+    } catch (error: any) {
+        console.error('[exchangePublicToken] FAILED:', error?.message ?? error);
+        throw error;
     }
 };
 
@@ -554,8 +547,10 @@ export const getBanks = async ({ userId }: getBanksProps) => {
             [Query.equal('userId', [userId])],
         );
 
+        console.log('[getBanks] found', banks.documents.length, 'banks for userId:', userId);
         return parseStringify(banks.documents);
-    } catch (error) {
+    } catch (error: any) {
+        console.error('[getBanks] FAILED for userId:', userId, '| error:', error?.message, '| code:', error?.code, '| type:', error?.type);
         return [];
     }
 };

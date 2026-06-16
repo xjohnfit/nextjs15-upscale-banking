@@ -22,6 +22,7 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
 
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
+    const [linkError, setLinkError] = useState<string | null>(null);
 
     useEffect(() => {
         const getLinkToken = async () => {
@@ -51,11 +52,13 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                     user,
                 });
 
-                // Use window.location for more reliable redirect instead of router.push
-                window.location.href = '/';
-            } catch (error) {
-                // Still redirect to dashboard even if there's an error
-                window.location.href = '/';
+                router.refresh();
+            } catch (error: any) {
+                const msg = error?.message ?? 'Unknown error linking bank account';
+                console.error('[PlaidLink] exchangePublicToken failed:', msg, error);
+                setLinkError(msg);
+                setLoading(false);
+                return;
             } finally {
                 setLoading(false);
             }
@@ -124,13 +127,23 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
     // Show error state if there's an issue with Plaid Link
     if (error) {
         console.error('Plaid Link error:', error);
-        // Return a disabled button if there's an error
         return (
             <Button
                 disabled
                 className={variant === 'ghost' ? 'bg-white' : ''}>
                 Link Unavailable
             </Button>
+        );
+    }
+
+    if (linkError) {
+        return (
+            <div className='flex flex-col gap-2'>
+                <p className='text-sm text-red-600 font-medium'>Bank linking failed: {linkError}</p>
+                <Button onClick={() => setLinkError(null)} variant='outline' className='text-sm'>
+                    Try again
+                </Button>
+            </div>
         );
     }
 
