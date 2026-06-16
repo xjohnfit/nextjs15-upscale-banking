@@ -52,10 +52,10 @@ const Home = async (props: SearchParamProps) => {
                                 subtext='Get started by connecting your first bank account. You can link your bank securely using Plaid.'
                             />
 
-                            <div className='mt-8 p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 text-center'>
-                                <div className='w-20 h-20 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center'>
+                            <div className='mt-8 p-8 bg-gradient-to-br from-violet-25 to-violet-50 rounded-xl border border-violet-200 text-center'>
+                                <div className='w-20 h-20 mx-auto mb-6 bg-violet-100 rounded-full flex items-center justify-center'>
                                     <svg
-                                        className='w-10 h-10 text-blue-600'
+                                        className='w-10 h-10 text-violet-600'
                                         fill='currentColor'
                                         viewBox='0 0 20 20'>
                                         <path

@@ -23,7 +23,7 @@ const config = {
         fill: {
           1: "rgba(255, 255, 255, 0.10)",
         },
-        bankGradient: "#0179FE",
+        bankGradient: "#5B7CFA",
         indigo: {
           500: "#6172F3",
           700: "#3538CD",
@@ -52,11 +52,21 @@ const config = {
           700: "#175CD3",
           900: "#194185",
         },
+        violet: {
+          25: "#F5F3FF",
+          50: "#EDE9FE",
+          100: "#DDD6FE",
+          200: "#C4B5FD",
+          500: "#8B5CF6",
+          600: "#7C3AED",
+          700: "#6D28D9",
+          900: "#4C1D95",
+        },
         sky: {
-          1: "#F3F9FF",
+          1: "#F5F3FF",
         },
         black: {
-          1: "#00214F",
+          1: "#1A1D3B",
           2: "#344054",
         },
         gray: {
@@ -70,7 +80,7 @@ const config = {
         },
       },
       backgroundImage: {
-        "bank-gradient": "linear-gradient(90deg, #0179FE 0%, #4893FF 100%)",
+        "bank-gradient": "linear-gradient(135deg, #5B7CFA 0%, #A855F7 100%)",
         "gradient-mesh": "url('/icons/gradient-mesh.svg')",
         "bank-green-gradient":
           "linear-gradient(90deg, #01797A 0%, #489399 100%)",
@@ -82,6 +92,7 @@ const config = {
         profile:
           "0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03)",
         creditCard: "8px 10px 16px 0px rgba(0, 0, 0, 0.05)",
+        brand: "0px 4px 24px 0px rgba(91, 124, 250, 0.20)",
       },
       fontFamily: {
         inter: "var(--font-inter)",

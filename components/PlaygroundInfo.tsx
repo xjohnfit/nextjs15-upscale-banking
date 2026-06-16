@@ -1,5 +1,3 @@
-import React from 'react';
-
 const PlaygroundInfo = () => {
     return (
         <section className='w-full max-w-sm mx-auto bg-white rounded-2xl p-6 flex flex-col items-center'>

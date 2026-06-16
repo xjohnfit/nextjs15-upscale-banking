@@ -3,33 +3,25 @@
 import { logoutAccount } from '@/lib/actions/user.actions';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React from 'react';
 
 const Footer = ({ user, type = 'desktop' }: FooterProps) => {
     const router = useRouter();
 
     const handleLogOut = async () => {
-        const loggedOut = await logoutAccount();
-
-        if (loggedOut) router.push('/sign-in');
+        await logoutAccount();
+        router.push('/sign-in');
     };
 
     return (
         <footer className='footer'>
-            <div
-                className={
-                    type === 'mobile' ? 'footer_name-mobile' : 'footer_name'
-                }>
-                <p className='text-xl font-bold text-gray-700'>
+            <div className={type === 'mobile' ? 'footer_name-mobile' : 'footer_name'}>
+                <p className='text-xl font-bold text-white'>
                     {user?.firstName[0]}
                 </p>
             </div>
 
-            <div
-                className={
-                    type === 'mobile' ? 'footer_email-mobile' : 'footer_email'
-                }>
-                <h1 className='text-14 truncate text-gray-700 font-semibold'>
+            <div className={type === 'mobile' ? 'footer_email-mobile' : 'footer_email'}>
+                <h1 className='text-14 truncate text-black-1 font-semibold'>
                     {user?.firstName}
                 </h1>
                 <p className='text-14 truncate font-normal text-gray-600'>
@@ -37,15 +29,16 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
                 </p>
             </div>
 
-            <div
+            <button
+                onClick={handleLogOut}
                 className='footer_image'
-                onClick={handleLogOut}>
+                aria-label='Log out'>
                 <Image
-                    src='icons/logout.svg'
+                    src='/icons/logout.svg'
                     fill
-                    alt='jsm'
+                    alt='Log out'
                 />
-            </div>
+            </button>
         </footer>
     );
 };

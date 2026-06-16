@@ -3,6 +3,7 @@
 import { ID, Query } from 'node-appwrite';
 import { createAdminClient, createSessionClient } from '../appwrite';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import {
     decryptId,
     encryptId,
@@ -198,15 +199,13 @@ export const signIn = async ({ email, password }: signInProps) => {
             getSessionCookieOptions(),
         );
 
-        // Try to get user info, but don't fail signin if it doesn't work
         let user;
         try {
             user = await getUserInfo({ userId: session.userId });
             if (!user) {
                 user = { userId: session.userId, email };
             }
-        } catch (userInfoError) {
-            // Return a minimal user object so frontend knows signin worked
+        } catch {
             user = { userId: session.userId, email };
         }
 
@@ -222,12 +221,6 @@ export const signIn = async ({ email, password }: signInProps) => {
             typeof error?.message === 'string'
                 ? error.message
                 : 'Unable to sign in at this time.';
-
-        console.error('[auth] signIn failed:', {
-            code,
-            type,
-            message,
-        });
 
         const isCredentialError =
             code === 401 ||
@@ -320,15 +313,13 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         );
 
         return parseStringify(newUser);
-    } catch (error: any) {
-        console.error('[auth] signUp failed:', error?.message || error);
+    } catch {
         return null;
     }
 };
 
-export async function getLoggedInUser() {
+const _getLoggedInUser = cache(async () => {
     try {
-        // First check if we have a session cookie
         const cookieStore = await cookies();
         const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
 
@@ -357,28 +348,13 @@ export async function getLoggedInUser() {
         }
 
         return parseStringify(user);
-    } catch (error: any) {
-        // Clear invalid session cookie for various Appwrite authentication errors
-        const shouldClearSession =
-            error &&
-            (error.message?.includes('session') ||
-                error.message?.includes('Invalid session') ||
-                error.message?.includes(
-                    'User (role: guests) missing scope (account)',
-                ) ||
-                error.message?.includes('Unauthorized') ||
-                error.type === 'user_unauthorized' ||
-                error.type === 'user_invalid_token' ||
-                error.type === 'general_unauthorized_scope' ||
-                error.code === 401);
-        if (shouldClearSession) {
-            // getLoggedInUser can run during Server Component rendering,
-            // where cookie mutation is not allowed.
-            return null;
-        }
-
+    } catch {
         return null;
     }
+});
+
+export async function getLoggedInUser() {
+    return _getLoggedInUser();
 }
 
 export const logoutAccount = async () => {
@@ -454,7 +430,6 @@ export const exchangePublicToken = async ({
     try {
         const plaidClient = createPlaidClient();
 
-        console.log('[exchangePublicToken] step 1: exchanging public token');
         const response = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,
         });
@@ -462,32 +437,26 @@ export const exchangePublicToken = async ({
         const accessToken = response.data.access_token;
         const itemId = response.data.item_id;
 
-        console.log('[exchangePublicToken] step 2: fetching accounts');
         const accountsResponse = await plaidClient.accountsGet({
             access_token: accessToken,
         });
 
         const accountData = accountsResponse.data.accounts[0];
-        console.log('[exchangePublicToken] account:', accountData?.name, accountData?.account_id);
 
-        console.log('[exchangePublicToken] step 3: creating processor token');
         const request: ProcessorTokenCreateRequest = {
             access_token: accessToken,
             account_id: accountData.account_id,
             processor: 'dwolla' as ProcessorTokenCreateRequestProcessorEnum,
         };
 
-        const processorTokenResponse =
-            await plaidClient.processorTokenCreate(request);
+        const processorTokenResponse = await plaidClient.processorTokenCreate(request);
         const processorToken = processorTokenResponse.data.processor_token;
-        console.log('[exchangePublicToken] processor token created:', !!processorToken);
 
         const existingBank = await getBankByAccountId({
             accountId: accountData.account_id,
         });
 
         if (existingBank && existingBank.userId === user.$id) {
-            console.log('[exchangePublicToken] bank already linked for user');
             revalidatePath('/');
             return parseStringify({
                 publicTokenExchange: 'complete',
@@ -495,10 +464,6 @@ export const exchangePublicToken = async ({
             });
         }
 
-        console.log('[exchangePublicToken] step 4: creating Dwolla funding source', {
-            dwollaCustomerId: user.dwollaCustomerId,
-            hasDwollaId: !!user.dwollaCustomerId,
-        });
         const fundingSourceUrl = await addFundingSource({
             dwollaCustomerId: user.dwollaCustomerId,
             processorToken,
@@ -506,12 +471,11 @@ export const exchangePublicToken = async ({
         });
 
         if (!fundingSourceUrl) {
-            const msg = `Failed to create Dwolla funding source. dwollaCustomerId=${user.dwollaCustomerId ?? 'MISSING'}`;
-            console.error('[exchangePublicToken]', msg);
-            throw new Error(msg);
+            throw new Error(
+                `Failed to create Dwolla funding source. dwollaCustomerId=${user.dwollaCustomerId ?? 'MISSING'}`,
+            );
         }
 
-        console.log('[exchangePublicToken] step 5: saving bank to Appwrite');
         const savedBank = await createBankAccount({
             userId: user.$id,
             bankId: itemId,
@@ -522,17 +486,13 @@ export const exchangePublicToken = async ({
         });
 
         if (!savedBank) {
-            throw new Error('Failed to save bank account to database. The Appwrite document could not be created.');
+            throw new Error('Failed to save bank account to database.');
         }
 
         revalidatePath('/');
 
-        console.log('[exchangePublicToken] complete');
-        return parseStringify({
-            publicTokenExchange: 'complete',
-        });
-    } catch (error: any) {
-        console.error('[exchangePublicToken] FAILED:', error?.message ?? error);
+        return parseStringify({ publicTokenExchange: 'complete' });
+    } catch (error) {
         throw error;
     }
 };
@@ -547,10 +507,8 @@ export const getBanks = async ({ userId }: getBanksProps) => {
             [Query.equal('userId', [userId])],
         );
 
-        console.log('[getBanks] found', banks.documents.length, 'banks for userId:', userId);
         return parseStringify(banks.documents);
-    } catch (error: any) {
-        console.error('[getBanks] FAILED for userId:', userId, '| error:', error?.message, '| code:', error?.code, '| type:', error?.type);
+    } catch {
         return [];
     }
 };

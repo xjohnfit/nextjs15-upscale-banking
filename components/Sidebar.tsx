@@ -15,18 +15,18 @@ const Sidebar = ({ user }: SidebarProps) => {
         <section className='sidebar'>
             <div className='flex flex-col h-full'>
                 <div className='flex-1 overflow-y-auto'>
-                    <nav className='flex flex-col gap-4'>
+                    <nav className='flex flex-col gap-1'>
                         <Link
                             href='/'
-                            className='mb-12 cursor-pointer flex items-center gap-2'>
+                            className='mb-6 cursor-pointer flex items-center gap-2 justify-center xl:justify-start'>
                             <Image
-                                src='/icons/logo.svg'
-                                width={34}
-                                height={34}
+                                src='/icons/upscale-banking-logo.png'
+                                width={88}
+                                height={88}
                                 alt='Upscale logo'
-                                className='size-[24px] max-xl:size-14'
+                                className='size-[88px] shrink-0'
                             />
-                            <h1 className='sidebar-logo'>Upscale Banking</h1>
+                            <h1 className='sidebar-logo bg-bank-gradient bg-clip-text text-transparent'>Upscale Banking</h1>
                         </Link>
 
                         {sidebarLinks.map((item, index) => {
@@ -39,7 +39,7 @@ const Sidebar = ({ user }: SidebarProps) => {
                                     href={item.route}
                                     key={index}
                                     className={cn('sidebar-link', {
-                                        'bg-bank-gradient': isActive,
+                                        'bg-bank-gradient shadow-brand': isActive,
                                     })}>
                                     <div className='relative size-6'>
                                         <Image
@@ -62,11 +62,6 @@ const Sidebar = ({ user }: SidebarProps) => {
                             );
                         })}
 
-                        <PlaidLink
-                            user={user}
-                            type='desktop'
-                            variant='primary'
-                        />
                     </nav>
                 </div>
 

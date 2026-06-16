@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -114,15 +114,16 @@ const AuthForm = ({ type }: { type: string; }) => {
             <header className='flex flex-col gap-5 md:gap-8'>
                 <Link
                     href='/'
-                    className='cursor-pointer flex items-center gap-1 justify-center'>
+                    className='cursor-pointer flex items-center gap-2'>
                     <Image
-                        src='/icons/logo.svg'
-                        width={30}
-                        height={30}
+                        src='/icons/upscale-banking-logo.png'
+                        width={88}
+                        height={88}
                         alt='Upscale logo'
                         priority
+                        className='size-[88px] shrink-0'
                     />
-                    <h1 className='text-26 font-ibm-plex-serif font-bold text-black-1'>
+                    <h1 className='text-30 font-ibm-plex-serif font-bold bg-bank-gradient bg-clip-text text-transparent'>
                         Upscale Banking
                     </h1>
                 </Link>

@@ -31,13 +31,13 @@ const BankInfo = ({ account, appwriteItemId, type }: BankInfoProps) => {
     <div
       onClick={handleBankChange}
       className={cn(`bank-info ${colors.bg}`, {
-        "shadow-sm border-blue-700": type === "card" && isActive,
+        "shadow-sm border-violet-600": type === "card" && isActive,
         "rounded-xl": type === "card",
         "hover:shadow-sm cursor-pointer": type === "card",
       })}
     >
       <figure
-        className={`flex-center h-fit rounded-full bg-blue-100 ${colors.lightBg}`}
+        className={`flex-center h-fit rounded-full bg-violet-100 ${colors.lightBg}`}
       >
         <Image
           src="/icons/connect-bank.svg"

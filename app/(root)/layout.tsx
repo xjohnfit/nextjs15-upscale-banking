@@ -19,21 +19,20 @@ export default async function RootLayout({
         <main className='flex h-screen w-full font-inter'>
             <Sidebar user={loggedIn} />
 
-            <div className='flex size-full flex-col'>
+            <div className='flex flex-1 min-w-0 flex-col'>
                 <div className='root-layout'>
-                    <div className='flex items-center gap-3 md:gap-5'>
+                    <div className='flex items-center gap-3'>
                         <Image
-                            src='/icons/logo.svg'
-                            width={30}
-                            height={30}
+                            src='/icons/upscale-banking-logo.png'
+                            width={34}
+                            height={34}
                             alt='logo'
                             priority
+                            className='size-9 shrink-0'
                         />
-                        <div>
-                            <h1 className='text-18 font-ibm-plex-serif font-bold text-black-1'>
-                                Upscale Banking
-                            </h1>
-                        </div>
+                        <h1 className='text-18 font-ibm-plex-serif font-bold bg-bank-gradient bg-clip-text text-transparent'>
+                            Upscale Banking
+                        </h1>
                     </div>
                     <div>
                         <MobileNav user={loggedIn} />

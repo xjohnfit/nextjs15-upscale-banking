@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import {
     PlaidLinkOnSuccess,
@@ -43,7 +43,7 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
     }, [user]);
 
     const onSuccess = useCallback<PlaidLinkOnSuccess>(
-        async (public_token: string, metadata) => {
+        async (public_token: string) => {
             try {
                 setLoading(true);
 
@@ -55,7 +55,6 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                 router.refresh();
             } catch (error: any) {
                 const msg = error?.message ?? 'Unknown error linking bank account';
-                console.error('[PlaidLink] exchangePublicToken failed:', msg, error);
                 setLinkError(msg);
                 setLoading(false);
                 return;
@@ -66,30 +65,9 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
         [user]
     );
 
-    const onExit = useCallback<PlaidLinkOnExit>((err, metadata) => {
-        // Handle Plaid Link exit - log any errors for debugging
-        if (err != null) {
-            console.log('Plaid Link exit error:', err);
-        }
-    }, []);
+    const onExit = useCallback<PlaidLinkOnExit>(() => {}, []);
 
-    const onEvent = useCallback<PlaidLinkOnEvent>((eventName, metadata) => {
-        // Handle Plaid Link events
-        console.log('Plaid Event:', eventName, metadata);
-
-        if (eventName === 'HANDOFF') {
-            console.log(
-                '🚨 OAuth Bank Selected - This will open a popup window'
-            );
-            console.log(
-                '💡 To avoid popups, try selecting these banks instead:'
-            );
-            console.log('   • First Platypus Bank');
-            console.log('   • Tattersall Federal Credit Union');
-            console.log('   • Houndstooth Bank');
-            console.log('   • The Royal Bank of Plaid');
-        }
-    }, []);
+    const onEvent = useCallback<PlaidLinkOnEvent>(() => {}, []);
 
     const config: PlaidLinkOptions = {
         token,
@@ -104,29 +82,11 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
     const { open, ready, error } = usePlaidLink(config);
 
     const handleClick = () => {
-        console.log('PlaidLink button clicked', {
-            ready,
-            loading,
-            token: !!token,
-        });
-
-        // Validate token and ready state before attempting to open Plaid
-        if (!token) {
-            console.error('Plaid token not available');
-            return;
-        }
-
-        if (ready && !loading) {
-            console.log('Opening Plaid Link');
-            open();
-        } else {
-            console.log('Plaid not ready or loading', { ready, loading });
-        }
+        if (!token || !ready || loading) return;
+        open();
     };
 
-    // Show error state if there's an issue with Plaid Link
     if (error) {
-        console.error('Plaid Link error:', error);
         return (
             <Button
                 disabled
@@ -169,19 +129,22 @@ const PlaidLink = ({ user, variant, type }: PlaidLinkProps) => {
                     disabled={isDisabled}
                     variant='ghost'
                     className='plaidlink-ghost'>
-                    <Image
-                        src='/icons/connect-bank.svg'
-                        alt='connect bank'
-                        width={24}
-                        height={24}
-                    />
-                    <p className='sm:block md:hidden lg:hidden xl:block text-[16px] font-semibold text-black-2'>
-                        {loading
-                            ? 'Connecting...'
-                            : ready
-                            ? 'Connect Bank'
-                            : 'Loading...'}
-                    </p>
+                    {type === 'add' ? (
+                        <>
+                            <span className='text-base leading-none'>+</span>
+                            <span>{loading ? 'Adding...' : 'Add bank'}</span>
+                        </>
+                    ) : (
+                        <>
+                            <Image
+                                src='/icons/connect-bank.svg'
+                                alt='connect bank'
+                                width={16}
+                                height={16}
+                            />
+                            <span>{loading ? 'Connecting...' : ready ? 'Connect Bank' : 'Loading...'}</span>
+                        </>
+                    )}
                 </Button>
             ) : variant === 'mobile-nav' ? (
                 <Button

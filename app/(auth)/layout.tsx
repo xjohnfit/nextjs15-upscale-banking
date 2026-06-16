@@ -1,24 +1,25 @@
-import Image from "next/image";
+import Image from 'next/image';
 
-export default function RootLayout({
-  children,
+export default function AuthLayout({
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <main className="flex min-h-screen w-full justify-between font-inter">
-      {children}
-      <div className="auth-asset">
-        <div>
-          <Image 
-            src="/icons/auth-image-start.jpeg"
-            alt="Auth image"
-            width={800}
-            height={800}
-            className="rounded-l-xl object-contain"
-          />
-        </div>
-      </div>
-    </main>
-  );
+    return (
+        <main className='flex min-h-screen w-full font-inter'>
+            <div className='flex flex-1 min-h-screen'>
+                {children}
+            </div>
+            <div className='auth-asset'>
+                <Image
+                    src='/icons/auth-image-start.jpeg'
+                    alt='Banking illustration'
+                    width={800}
+                    height={800}
+                    className='object-contain rounded-xl max-h-[80vh] w-auto'
+                    priority
+                />
+            </div>
+        </main>
+    );
 }

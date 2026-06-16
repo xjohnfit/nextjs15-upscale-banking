@@ -1,6 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
 import BankCard from './BankCard';
 import { countTransactionCategories } from '@/lib/utils';
 import Category from './Category';
@@ -12,49 +10,40 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
 
     return (
         <aside className='right-sidebar'>
-            <section className='flex flex-col pb-8'>
-                <div className='profile-banner' />
-                <div className='profile'>
-                    <div className='profile-img'>
-                        <span className='text-5xl font-bold text-blue-500'>
+            {/* Profile card */}
+            <section className='px-5 pt-6 pb-3'>
+                <div className='flex items-center gap-3 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-25 to-blue-25 p-4'>
+                    <div className='flex-center size-11 shrink-0 rounded-full bg-bank-gradient'>
+                        <span className='text-lg font-bold text-white'>
                             {user.firstName[0]}
                         </span>
                     </div>
-
-                    <div className='profile-details'>
-                        <h1 className='profile-name'>
+                    <div className='min-w-0 flex-1'>
+                        <h1 className='truncate text-[15px] font-semibold text-black-1'>
                             {user.firstName} {user.lastName}
                         </h1>
-                        <p className='profile-email'>{user.email}</p>
+                        <p className='truncate text-[13px] text-gray-500'>
+                            {user.email}
+                        </p>
                     </div>
                 </div>
             </section>
 
-            <section className='banks'>
-                <div className='flex w-full justify-between'>
-                    <h2 className='header-2'>My Banks</h2>
+            {/* Divider */}
+            <div className='mx-5 border-t border-violet-100' />
 
-                    {
-                    banks?.length > 0 ? (
-                        <Link
-                              href='/'
-                              className='flex gap-2'>
-                              <Image
-                                  src='/icons/plus.svg'
-                                  width={20}
-                                  height={20}
-                                  alt='plus'
-                              />
-                              <h2 className='text-14 font-semibold text-gray-600'>
-                                  Add Bank
-                              </h2>
-                          </Link>
-                    ) : null}
+            {/* Banks */}
+            <section className='banks'>
+                <div className='flex w-full items-center justify-between'>
+                    <h2 className='header-2'>My Banks</h2>
+                    {banks?.length > 0 && (
+                        <PlaidLink user={user} variant='ghost' type='add' />
+                    )}
                 </div>
 
                 {banks?.length > 0 ? (
-                    <div className='relative flex flex-1 flex-col items-center justify-center gap-5'>
-                        <div className='relative z-10'>
+                    <div className='relative flex min-h-[220px] flex-col items-center'>
+                        <div className='relative z-10 w-full'>
                             <BankCard
                                 key={banks[0].$id}
                                 account={banks[0]}
@@ -74,23 +63,21 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
                         )}
                     </div>
                 ) : (
-                    <div className='mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-dashed border-blue-200'>
-                        <div className='text-center'>
-                            <div className='w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center'>
+                    <div className='rounded-2xl border-2 border-dashed border-violet-200 bg-gradient-to-br from-violet-25 to-violet-50 p-5'>
+                        <div className='flex flex-col items-center text-center'>
+                            <div className='mb-3 flex size-11 items-center justify-center rounded-full bg-violet-100'>
                                 <Image
                                     src='/icons/connect-bank.svg'
-                                    width={32}
-                                    height={32}
+                                    width={22}
+                                    height={22}
                                     alt='Connect Bank'
                                 />
                             </div>
-                            <h3 className='text-lg font-semibold text-gray-900 mb-2'>
-                                Connect Your First Bank
+                            <h3 className='mb-1 text-[14px] font-semibold text-gray-900'>
+                                No banks connected
                             </h3>
-                            <p className='text-sm text-gray-600 mb-4'>
-                                Start by securely connecting your bank account
-                                to view balances, transactions, and manage your
-                                finances.
+                            <p className='mb-4 text-[13px] text-gray-500'>
+                                Securely link your bank to view balances and track transactions.
                             </p>
                             <PlaidLink
                                 user={user}
@@ -100,20 +87,22 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
                         </div>
                     </div>
                 )}
-
-                <div className='mt-10 flex flex-1 flex-col gap-6'>
-                    <h2 className='header-2'>Top Categories</h2>
-
-                    <div className='space-y-5'>
-                        {categories.map((category, index) => (
-                            <Category
-                                key={index}
-                                category={category}
-                            />
-                        ))}
-                    </div>
-                </div>
             </section>
+
+            {/* Top Categories */}
+            {categories.length > 0 && (
+                <>
+                    <div className='mx-5 border-t border-violet-100' />
+                    <section className='px-5 py-5'>
+                        <h2 className='header-2 mb-4'>Top Categories</h2>
+                        <div className='space-y-3'>
+                            {categories.map((category, index) => (
+                                <Category key={index} category={category} />
+                            ))}
+                        </div>
+                    </section>
+                </>
+            )}
         </aside>
     );
 };

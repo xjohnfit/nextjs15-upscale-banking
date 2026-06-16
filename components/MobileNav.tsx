@@ -34,17 +34,19 @@ const MobileNav = ({ user }: MobileNavProps) => {
                 </SheetTrigger>
                 <SheetContent
                     side='left'
-                    className='border-none bg-white flex flex-col h-full'>
+                    className='border-none flex flex-col h-full p-0 overflow-hidden'
+                    style={{ background: 'linear-gradient(175deg, #EDE9FE 0%, #F8F7FF 15%, #FFFFFF 35%)' }}>
                     <Link
                         href='/'
-                        className='cursor-pointer flex items-center gap-5 px-4 py-4 border-b border-gray-100'>
+                        className='cursor-pointer flex items-center gap-3 px-5 py-5'>
                         <Image
-                            src='/icons/logo.svg'
-                            width={34}
-                            height={34}
+                            src='/icons/upscale-banking-logo.png'
+                            width={88}
+                            height={88}
                             alt='Upscale logo'
+                            className='size-[88px] shrink-0'
                         />
-                        <h1 className='text-18 font-ibm-plex-serif font-bold text-black-1'>
+                        <h1 className='text-[22px] font-ibm-plex-serif font-bold bg-bank-gradient bg-clip-text text-transparent'>
                             Upscale Banking
                         </h1>
                     </Link>
@@ -52,7 +54,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                     {/* Scrollable content area */}
                     <div className='flex-1 overflow-y-auto'>
                         <SheetClose asChild>
-                            <nav className='flex flex-col gap-2 p-4'>
+                            <nav className='flex flex-col gap-1 px-3 py-2'>
                                 {sidebarLinks.map((item) => {
                                     const isActive =
                                         pathname === item.route ||
@@ -68,7 +70,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                                                 className={cn(
                                                     'mobilenav-sheet_close w-full',
                                                     {
-                                                        'bg-bank-gradient':
+                                                        'bg-bank-gradient shadow-brand':
                                                             isActive,
                                                     }
                                                 )}>
@@ -84,7 +86,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                                                 />
                                                 <p
                                                     className={cn(
-                                                        'text-16 font-semibold text-black-2',
+                                                        'text-[15px] font-semibold text-gray-600',
                                                         {
                                                             'text-white':
                                                                 isActive,
@@ -99,17 +101,10 @@ const MobileNav = ({ user }: MobileNavProps) => {
                             </nav>
                         </SheetClose>
 
-                        <div className='px-4 pb-4'>
-                            <PlaidLink
-                                user={user}
-                                variant='mobile-nav'
-                                type='default'
-                            />
-                        </div>
                     </div>
 
                     {/* Fixed footer at bottom */}
-                    <div className='border-t border-gray-100 p-4'>
+                    <div className='border-t border-violet-100 px-5 py-4'>
                         <Footer
                             user={user}
                             type='mobile'
